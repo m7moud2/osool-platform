@@ -844,11 +844,16 @@
           </button>
         </form>
 
-        <div class="pt-2 border-t border-black/10 dark:border-white/10 flex items-center justify-between text-[11px]">
-          <button type="button" onclick="loginDemoGuest()" class="text-emeraldDeep dark:text-emeraldAccent font-semibold hover:underline">
-            ⚡ الدخول بحساب تجريبي سريع (ضيافة)
-          </button>
-          <button type="button" onclick="closeAuthModalIfLoggedIn()" id="authCloseBtn" class="text-slateMuted hover:text-obsidian dark:hover:text-white hidden">
+        <div class="pt-2 border-t border-black/10 dark:border-white/10 flex flex-col gap-2 text-[11px]">
+          <div class="flex items-center justify-between gap-2">
+            <button type="button" onclick="loginDemoGuest()" class="text-emeraldDeep dark:text-emeraldAccent font-semibold hover:underline">
+              ⚡ الدخول بحساب تجريبي سريع (ضيافة)
+            </button>
+            <button type="button" onclick="loginAdmin()" class="text-rose-600 dark:text-rose-400 font-semibold hover:underline">
+              🔐 دخول المدير
+            </button>
+          </div>
+          <button type="button" onclick="closeAuthModalIfLoggedIn()" id="authCloseBtn" class="text-slateMuted hover:text-obsidian dark:hover:text-white hidden text-right">
             إغلاق
           </button>
         </div>
@@ -867,6 +872,7 @@
     // الحالة المركزية للتطبيق (State Management)
     const state = {
       user: null, // بيانات المستخدم المسجل
+      role: 'user',
       currency: 'EGP',
       rates: { EGP: 1, SAR: 0.076, AED: 0.075, USD: 0.0204 },
       symbols: { EGP: 'ج.م', SAR: 'ر.س', AED: 'د.إ', USD: '$' },
@@ -1039,7 +1045,9 @@
       const savedUser = localStorage.getItem('osool_current_user');
       if (savedUser) {
         try {
-          state.user = JSON.parse(savedUser);
+          const parsed = JSON.parse(savedUser);
+          state.user = parsed;
+          state.role = parsed.role || 'user';
           applyUserData();
           closeAuthModal();
         } catch (e) {
@@ -1101,6 +1109,7 @@
       };
 
       state.user = userObj;
+      state.role = 'user';
       state.currency = curr;
       state.cashBalance = initialBal;
       document.getElementById('currencySelect').value = curr;
@@ -1112,6 +1121,28 @@
       showToast(`مرحباً بك يا ${name}! تم فتح محفظتك برصيد ${fmtMoney(initialBal)}`);
     }
 
+    function loginAdmin() {
+      const adminUser = {
+        name: 'مدير المنصة',
+        phone: 'ADMIN',
+        currency: 'EGP',
+        nominee: 'لوحة إدارة المنصة',
+        accountNo: 'ADMIN-01',
+        joinedAt: new Date().toLocaleDateString('ar-EG'),
+        role: 'admin'
+      };
+      state.user = adminUser;
+      state.role = 'admin';
+      state.currency = 'EGP';
+      document.getElementById('currencySelect').value = 'EGP';
+      localStorage.setItem('osool_current_user', JSON.stringify(adminUser));
+      applyUserData();
+      closeAuthModal();
+      renderAll();
+      openModal('لوحة مدير المنصة', renderAdminQueueHtml());
+      showToast('تم تسجيل الدخول كمدير المنصة');
+    }
+
     function loginDemoGuest() {
       const demoNames = ['أحمد الشريف', 'كريم عثمان', 'عمر الفاروق', 'يوسف ممدوح'];
       const pickedName = demoNames[Math.floor(Math.random() * demoNames.length)];
@@ -1121,10 +1152,12 @@
         currency: 'EGP',
         nominee: 'الوكيل العائلي المعتمد',
         accountNo: Math.floor(1000 + Math.random() * 9000),
-        joinedAt: new Date().toLocaleDateString('ar-EG')
+        joinedAt: new Date().toLocaleDateString('ar-EG'),
+        role: 'user'
       };
 
       state.user = userObj;
+      state.role = 'user';
       state.currency = 'EGP';
       state.cashBalance = 60000;
       document.getElementById('currencySelect').value = 'EGP';
@@ -1140,11 +1173,12 @@
       if (!state.user) return;
       document.getElementById('userDisplayName').textContent = state.user.name;
       document.getElementById('navUserBadge').textContent = state.user.name.split(' ')[0];
+      const isAdmin = state.role === 'admin';
       document.getElementById('userAccountBadge').innerHTML = `
         <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
-        وكالة موثقة #${state.user.accountNo || '8841'}
+        ${isAdmin ? 'لوحة إدارة المنصة' : `وكالة موثقة #${state.user.accountNo || '8841'}`}
       `;
-      document.getElementById('userPhoneDisplay').textContent = `${state.user.phone} • محفظة الأصول الموثقة`;
+      document.getElementById('userPhoneDisplay').textContent = `${state.user.phone} • ${isAdmin ? 'إدارة المراقبة والتأكيدات' : 'محفظة الأصول الموثقة'}`;
       
       const nomInput = document.getElementById('nomineeNameInput');
       if (nomInput && state.user.nominee) nomInput.value = state.user.nominee;
@@ -1195,6 +1229,11 @@
       const opsVal = state.ownedAssets.reduce((s, a) => s + a.amount, 0);
       const totalWealth = goldVal + opsVal + state.cashBalance;
       const monthlyYield = state.ownedAssets.reduce((s, a) => s + a.monthlyReturn, 0);
+
+      const userBadge = document.getElementById('navUserBadge');
+      if (userBadge && state.user) {
+        userBadge.textContent = state.role === 'admin' ? 'مدير' : state.user.name.split(' ')[0];
+      }
 
       document.getElementById('liveGoldTicker').textContent = fmtMoney(state.goldPrice24);
       document.getElementById('totalWealthDisplay').textContent = fmtMoney(totalWealth);
@@ -1794,30 +1833,163 @@
       executeAutoHedgeBasket();
     }
 
+    function readFileAsDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('فشل قراءة الملف'));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function getWalletQueue() {
+      try {
+        return JSON.parse(localStorage.getItem('osool_wallet_queue') || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveWalletQueue(queue) {
+      localStorage.setItem('osool_wallet_queue', JSON.stringify(queue));
+    }
+
+    function renderAdminQueueHtml() {
+      const queue = getWalletQueue();
+      if (!queue.length) {
+        return `
+          <div class="p-3 rounded-xl bg-alabaster dark:bg-obsidian text-[11px] text-slateMuted">
+            لا توجد طلبات جديدة حالياً. سيتم ظهور طلبات شحن المحفظة أو سحبها هنا فور إرسالها من المستخدمين.
+          </div>
+        `;
+      }
+
+      return `
+        <div class="space-y-3">
+          ${queue.map(item => `
+            <div class="p-3 rounded-xl border border-black/10 dark:border-white/10 bg-alabaster dark:bg-obsidian">
+              <div class="flex items-center justify-between gap-2">
+                <div>
+                  <p class="text-xs font-bold text-obsidian dark:text-white">${item.userName}</p>
+                  <p class="text-[10px] text-slateMuted">${item.type === 'deposit' ? 'طلب شحن رصيد' : 'طلب سحب رصيد'} • ${item.phone}</p>
+                </div>
+                <span class="text-[10px] px-2 py-1 rounded-full ${item.status === 'pending' ? 'bg-amber-500/15 text-amber-700' : 'bg-emerald-500/15 text-emerald-700'} font-bold">
+                  ${item.status === 'pending' ? 'قيد المراجعة' : 'موافَق'}
+                </span>
+              </div>
+              <div class="mt-2 text-[11px] flex justify-between items-center">
+                <span>المبلغ:</span>
+                <strong class="num font-bold">${fmtMoney(item.amount)}</strong>
+              </div>
+              ${item.note ? `<p class="text-[10px] mt-2 text-slateMuted">ملاحظات: ${item.note}</p>` : ''}
+              ${item.image ? `<img src="${item.image}" alt="إثبات التحويل" class="mt-2 w-full rounded-lg border border-black/10 dark:border-white/10">` : ''}
+              ${item.status === 'pending' ? `
+                <button onclick="approveWalletQueue('${item.id}', '${item.type}')" class="w-full mt-3 py-2 rounded-xl bg-emeraldDeep text-white text-xs font-bold">
+                  الموافقة على الطلب وتحديث المحفظة
+                </button>
+              ` : ''}
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function approveWalletQueue(id, type) {
+      const queue = getWalletQueue();
+      const item = queue.find(r => r.id === id);
+      if (!item) return showToast('هذا الطلب غير موجود');
+      item.status = 'approved';
+      saveWalletQueue(queue);
+
+      if (type === 'deposit') {
+        state.cashBalance += item.amount;
+        state.ledger.unshift({ title: `تأكيد شحن محفظة من ${item.userName}`, date: 'الآن', amount: `+${fmtMoney(item.amount)}`, type: 'in' });
+        showToast(`تمت الموافقة على شحن ${fmtMoney(item.amount)} لمحفظة ${item.userName}`);
+      } else {
+        if (item.amount > state.cashBalance) {
+          item.status = 'pending';
+          saveWalletQueue(queue);
+          return showToast('لا يوجد رصيد كافٍ في محفظة المدير لاستخدام هذا السحب');
+        }
+        state.cashBalance -= item.amount;
+        state.ledger.unshift({ title: `موافقة على سحب ${item.userName}`, date: 'الآن', amount: `-${fmtMoney(item.amount)}`, type: 'out' });
+        showToast(`تمت الموافقة على سحب ${fmtMoney(item.amount)} من حساب ${item.userName}`);
+      }
+
+      closeModal();
+      renderAll();
+      openModal('لوحة مدير المنصة', renderAdminQueueHtml());
+    }
+
     function openCashModal(mode) {
-      openModal(mode === 'deposit' ? 'إيداع وشحن سيولة بالمحفظة' : 'استرداد وسحب الأرباح ورأس المال', `
-        <input type="number" id="cashModalAmt" value="10000" step="1000" class="w-full px-3 py-2 rounded-xl bg-alabaster dark:bg-obsidian num font-bold text-sm">
-        <button onclick="executeCashAction('${mode}')" class="w-full py-2.5 rounded-xl bg-emeraldDeep text-white font-bold">
-          ${mode === 'deposit' ? 'تأكيد الإيداع الفوري' : 'تأكيد التحويل للحساب البنكي'}
-        </button>
+      const isDeposit = mode === 'deposit';
+      openModal(isDeposit ? 'إيداع وشحن سيولة بالمحفظة' : 'طلب سحب نقدي من المحفظة', `
+        <div class="space-y-3">
+          <div class="p-3 rounded-xl bg-alabaster dark:bg-obsidian">
+            <p class="text-[10px] text-slateMuted mb-1">الحساب البنكي / المحفظة المخصصة للتحويل</p>
+            <strong class="num text-sm font-bold text-obsidian dark:text-white">Amanah Wallet • 800-225-444-21</strong>
+          </div>
+          <div>
+            <label class="text-[11px] text-slateMuted block mb-1">المبلغ (${isDeposit ? 'شحن' : 'سحب'})</label>
+            <input type="number" id="cashModalAmt" value="10000" step="1000" class="w-full px-3 py-2 rounded-xl bg-alabaster dark:bg-obsidian num font-bold text-sm">
+          </div>
+          <div>
+            <label class="text-[11px] text-slateMuted block mb-1">ملاحظات/بيان التحويل</label>
+            <textarea id="cashModalNote" rows="3" class="w-full px-3 py-2 rounded-xl bg-alabaster dark:bg-obsidian text-xs border border-black/10 dark:border-white/10" placeholder="${isDeposit ? 'أدخل اسم البنك/المحفظة ورقم الإيصال' : 'أدخل سبب السحب أو الحساب المستهدف'}"></textarea>
+          </div>
+          ${isDeposit ? `
+            <div>
+              <label class="text-[11px] text-slateMuted block mb-1">ملف أو صورة الإيصال/الشاشة</label>
+              <input type="file" id="cashModalProof" accept="image/*" class="w-full text-[11px] px-2 py-2 rounded-xl bg-alabaster dark:bg-obsidian border border-black/10 dark:border-white/10">
+            </div>
+          ` : ''}
+          <button onclick="executeCashAction('${mode}')" class="w-full py-2.5 rounded-xl ${isDeposit ? 'bg-emeraldDeep' : 'bg-obsidian dark:bg-goldBullion dark:text-obsidian'} text-white font-bold">
+            ${isDeposit ? 'إرسال طلب شحن للمراجعة' : 'إرسال طلب السحب للمراجعة'}
+          </button>
+        </div>
       `);
     }
 
     function executeCashAction(mode) {
       const amt = parseFloat(document.getElementById('cashModalAmt').value) || 0;
-      if (amt <= 0) return;
-      if (mode === 'deposit') {
-        state.cashBalance += amt;
-        state.ledger.unshift({ title: 'إيداع سيولة نقدية بالمحفظة', date: 'الآن', amount: `+${fmtMoney(amt)}`, type: 'in' });
-        showToast(`تم إيداع ${fmtMoney(amt)} بنجاح`);
-      } else {
-        if (amt > state.cashBalance) return showToast('الرصيد النقدي المتاح أقل من المبلغ المطلوب');
-        state.cashBalance -= amt;
-        state.ledger.unshift({ title: 'سحب واسترداد نقدي للحساب البنكي', date: 'الآن', amount: `-${fmtMoney(amt)}`, type: 'out' });
-        showToast(`تم تحويل ${fmtMoney(amt)} لحسابك البنكي`);
+      const note = document.getElementById('cashModalNote').value.trim();
+      if (amt <= 0) return showToast('يرجى كتابة مبلغ صحيح');
+      if (!state.user) return showToast('يرجى تسجيل الدخول أولاً');
+
+      const queue = getWalletQueue();
+      const newRequest = {
+        id: `REQ-${Date.now()}`,
+        type: mode,
+        userName: state.user.name,
+        phone: state.user.phone,
+        amount: amt,
+        note: note,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+        image: ''
+      };
+
+      const proofInput = document.getElementById('cashModalProof');
+      if (proofInput && proofInput.files && proofInput.files[0]) {
+        readFileAsDataUrl(proofInput.files[0]).then(data => {
+          newRequest.image = data;
+          queue.push(newRequest);
+          saveWalletQueue(queue);
+          closeModal();
+          showToast(mode === 'deposit' ? 'تم إرسال طلب شحن المحفظة للإدارة للمراجعة' : 'تم إرسال طلب السحب للإدارة للمراجعة');
+        }).catch(() => {
+          queue.push(newRequest);
+          saveWalletQueue(queue);
+          closeModal();
+          showToast(mode === 'deposit' ? 'تم إرسال طلب شحن المحفظة دون صورة إثبات' : 'تم إرسال طلب السحب للإدارة للمراجعة');
+        });
+        return;
       }
+
+      queue.push(newRequest);
+      saveWalletQueue(queue);
       closeModal();
-      renderAll();
+      showToast(mode === 'deposit' ? 'تم إرسال طلب شحن المحفظة للإدارة للمراجعة' : 'تم إرسال طلب السحب للإدارة للمراجعة');
     }
 
     function filterOpportunities(cat) {
