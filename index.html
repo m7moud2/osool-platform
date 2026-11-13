@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>أصول | Osool — منصة الثروة والأصول الحقيقية الموثقة</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            ivory: '#F8F7F4',
+            alabaster: '#F1EFEA',
+            obsidian: '#0B0F17',
+            charcoal: '#151C28',
+            emeraldDeep: '#062C21',
+            emeraldMid: '#0A3F2F',
+            emeraldAccent: '#10B981',
+            goldBullion: '#C5A059',
+            goldLight: '#E6CFA0',
+            goldDark: '#9A7836',
+            slateMuted: '#64748B'
+          },
+          fontFamily: {
+            sans: ['"IBM Plex Sans Arabic"', 'sans-serif'],
+            num: ['"Plus Jakarta Sans"', '"IBM Plex Sans Arabic"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+    body {
+      font-family: 'IBM Plex Sans Arabic', sans-serif;
+      background-color: #E5E2DC;
+      color: #0B0F17;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+    html.dark body {
+      background-color: #05080D;
+      color: #F8F7F4;
+    }
+    .num {
+      font-family: 'Plus Jakarta Sans', 'IBM Plex Sans Arabic', sans-serif;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    .surface-card {
+      background: #FFFFFF;
+      border: 1px solid rgba(11, 15, 23, 0.08);
+      box-shadow: 0 2px 10px -2px rgba(11, 15, 23, 0.03);
+    }
+    html.dark .surface-card {
+      background: #121822;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.4);
+    }
+    .vault-gradient {
+      background: linear-gradient(145deg, #062C21 0%, #041B14 60%, #091318 100%);
+    }
+    .bullion-gradient {
+      background: linear-gradient(135deg, #D4B475 0%, #C5A059 50%, #9A7836 100%);
+    }
+    .obsidian-gradient {
+      background: linear-gradient(145deg, #151C28 0%, #0B0F17 100%);
+    }
+    .hairline-t { border-top: 1px solid rgba(11, 15, 23, 0.07); }
+    html.dark .hairline-t { border-top: 1px solid rgba(255, 255, 255, 0.07); }
+    canvas#sigCanvas { touch-action: none; cursor: crosshair; }
+    
+    @keyframes subtlePulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .live-dot { animation: subtlePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start py-0 sm:py-4">
+
+  <!-- شريط التحكم العلوي الشامل (360° Ecosystem Switcher) -->
+  <header class="w-full max-w-[440px] bg-obsidian text-white px-3.5 py-2.5 sm:rounded-t-2xl border-b border-white/10 z-40">
+    <div class="flex items-center justify-between gap-2 mb-2">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-lg bullion-gradient flex items-center justify-center text-obsidian font-extrabold text-sm shadow-sm">أ</div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="font-bold text-xs tracking-wide text-white">أصول</span>
+            <span class="text-[9px] font-num uppercase tracking-widest px-1.5 py-0.5 rounded bg-white/10 text-goldLight">OSOOL 360°</span>
+          </div>
+          <p class="text-[10px] text-slate-400">منظومة إدارة الذهب والأصول التشغيلية الموثقة</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-1.5">
+        <select id="currencySelect" onchange="changeCurrency(this.value)" class="bg-white/10 text-white text-[10px] font-num font-semibold rounded-md px-2 py-1 border border-white/15 focus:outline-none">
+          <option value="EGP" class="text-black">EGP ج.م</option>
+          <option value="SAR" class="text-black">SAR ر.س</option>
+          <option value="AED" class="text-black">AED د.إ</option>
+          <option value="USD" class="text-black">USD $</option>
+        </select>
+        <button onclick="toggleTheme()" class="w-7 h-7 rounded-md bg-white/10 hover:bg-white/15 flex items-center justify-center text-slate-200 border border-white/10" title="تغيير المظهر">
+          <svg id="themeIcon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- محول بوابات نموذج العمل الأربع -->
+    <div class="grid grid-cols-4 gap-1 bg-white/5 p-1 rounded-xl border border-white/10 text-[10px] font-medium">
+      <button onclick="switchRole('investor')" id="roleBtn-investor" class="py-1.5 px-1 rounded-lg bg-goldBullion text-obsidian font-bold transition-all text-center truncate">
+        1. المستثمر
+      </button>
+      <button onclick="switchRole('merchant')" id="roleBtn-merchant" class="py-1.5 px-1 rounded-lg text-slate-300 hover:text-white transition-all text-center truncate">
+        2. بوابة التجار
+      </button>
+      <button onclick="switchRole('sharia')" id="roleBtn-sharia" class="py-1.5 px-1 rounded-lg text-slate-300 hover:text-white transition-all text-center truncate">
+        3. الرقابة الشرعية
+      </button>
+      <button onclick="switchRole('founder')" id="roleBtn-founder" class="py-1.5 px-1 rounded-lg text-slate-300 hover:text-white transition-all text-center truncate">
+        4. إدارة المؤسس
+      </button>
+    </div>
+  </header>
+
+  <!-- حاوية الهاتف الرئيسية (Figma Mobile Frame) -->
+  <div class="w-full max-w-[440px] bg-ivory dark:bg-obsidian sm:rounded-b-3xl shadow-2xl border-x border-b border-black/10 dark:border-white/10 flex flex-col relative min-h-[780px] max-h-[860px] overflow-hidden">
+
+    <!-- شريط الأسعار المباشر (Live Institutional Ticker) -->
+    <div class="bg-alabaster dark:bg-charcoal px-4 py-1.5 border-b border-black/5 dark:border-white/5 flex items-center justify-between text-[11px]">
+      <div class="flex items-center gap-2">
+        <span class="w-1.5 h-1.5 rounded-full bg-emeraldAccent live-dot"></span>
+        <span class="text-slateMuted dark:text-slate-400">ذهب عيار 24 (خزينة معتمدة):</span>
+        <span id="liveGoldTicker" class="num font-bold text-obsidian dark:text-white">4,120 ج.م</span>
+        <span id="liveGoldDiff" class="num text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold">+0.8%</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="simulateGoldTick()" class="text-[10px] px-2 py-0.5 rounded bg-black/5 dark:bg-white/10 text-obsidian dark:text-slate-200 hover:opacity-80 font-medium">
+          تحديث السعر
+        </button>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- البوابة 1: تطبيق المستثمر (INVESTOR APP) -->
+    <!-- ========================================== -->
+    <div id="roleView-investor" class="flex-1 overflow-y-auto no-scrollbar pb-24">
+
+      <!-- الشاشة 1: المحفظة الرئيسية (Home / Wealth Overview) -->
+      <section id="invTab-home" class="p-4 space-y-4">
+        
+        <!-- ترويسة الحساب والخصوصية -->
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h1 class="text-sm font-bold text-obsidian dark:text-white">محمود عبدالقوي</h1>
+              <span class="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emeraldDeep/10 dark:bg-emeraldAccent/15 text-emeraldDeep dark:text-emeraldAccent font-semibold">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+                وكالة موثقة #8841
+              </span>
+            </div>
+            <p class="text-[11px] text-slateMuted dark:text-slate-400">محفظة المغتربين والأصول العينية المباشرة</p>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <button onclick="openFriendProposalModal()" class="px-2.5 py-1.5 rounded-lg bg-goldBullion/15 text-goldDark dark:text-goldLight text-[11px] font-semibold border border-goldBullion/30 flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/></svg>
+              دراسة لصديق
+            </button>
+            <button onclick="togglePrivacy()" class="w-8 h-8 rounded-lg surface-card flex items-center justify-center text-slateMuted hover:text-obsidian dark:hover:text-white" title="إخفاء/إظهار الأرقام">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3.75 3.75 0 11-6 0 3.75 3.75 0 016 0z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- بطاقة صافي الثروة السيادية (Sovereign Wealth Card) -->
+        <div class="vault-gradient rounded-2xl p-5 text-white shadow-lg relative overflow-hidden border border-white/10">
+          <div class="absolute -left-10 -bottom-10 w-40 h-40 rounded-full bg-goldBullion/10 blur-2xl pointer-events-none"></div>
+          
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[11px] text-slate-300 font-medium">إجمالي صافي الأصول المملوكة</span>
+            <span class="text-[10px] font-num px-2 py-0.5 rounded bg-white/10 text-goldLight border border-white/10">عقد مضاربة / وكالة</span>
+          </div>
+
+          <div class="flex items-baseline justify-between my-2">
+            <h2 id="totalWealthDisplay" class="num text-2xl sm:text-3xl font-extrabold tracking-tight text-white">248,620 ج.م</h2>
+            <span id="monthlyYieldBadge" class="num text-xs font-semibold text-emeraldAccent bg-emeraldAccent/15 px-2 py-0.5 rounded-md border border-emeraldAccent/30">
+              +4,850 ج.م / شهر
+            </span>
+          </div>
+
+          <!-- شريط توزيع المحفظة الدقيق -->
+          <div class="mt-3 mb-2">
+            <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden flex">
+              <div id="barGold" class="bg-goldBullion h-full transition-all duration-500" style="width: 42%"></div>
+              <div id="barOps" class="bg-emeraldAccent h-full transition-all duration-500" style="width: 43%"></div>
+              <div id="barCash" class="bg-sky-400 h-full transition-all duration-500" style="width: 15%"></div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 pt-2 border-t border-white/10 text-[11px]">
+            <div>
+              <div class="flex items-center gap-1 text-slate-300">
+                <span class="w-2 h-2 rounded-full bg-goldBullion"></span>
+                <span>ذهب عيني 24K</span>
+              </div>
+              <p id="summaryGoldGrams" class="num font-bold text-white mt-0.5">25.50 جم</p>
+            </div>
+            <div>
+              <div class="flex items-center gap-1 text-slate-300">
+                <span class="w-2 h-2 rounded-full bg-emeraldAccent"></span>
+                <span>أصول تشغيلية</span>
+              </div>
+              <p id="summaryOpsValue" class="num font-bold text-white mt-0.5">108,000 ج.م</p>
+            </div>
+            <div>
+              <div class="flex items-center gap-1 text-slate-300">
+                <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                <span>سيولة جاهزة</span>
+              </div>
+              <p id="summaryCashValue" class="num font-bold text-white mt-0.5">35,560 ج.م</p>
+            </div>
+          </div>
+
+          <!-- أزرار العمليات المصرفية السريعة -->
+          <div class="grid grid-cols-4 gap-2 mt-4 pt-3 border-t border-white/10">
+            <button onclick="openCashModal('deposit')" class="py-2 rounded-xl bg-white/10 hover:bg-white/15 flex flex-col items-center gap-1 transition">
+              <svg class="w-4 h-4 text-goldLight" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+              <span class="text-[10px] font-medium">إيداع سيولة</span>
+            </button>
+            <button onclick="switchInvTab('gold')" class="py-2 rounded-xl bg-white/10 hover:bg-white/15 flex flex-col items-center gap-1 transition">
+              <svg class="w-4 h-4 text-goldLight" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375"/></svg>
+              <span class="text-[10px] font-medium">تداول ذهب</span>
+            </button>
+            <button onclick="openAdvisorModal()" class="py-2 rounded-xl bg-white/10 hover:bg-white/15 flex flex-col items-center gap-1 transition">
+              <svg class="w-4 h-4 text-goldLight" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3"/></svg>
+              <span class="text-[10px] font-medium">المستشار الذكي</span>
+            </button>
+            <button onclick="openCashModal('withdraw')" class="py-2 rounded-xl bg-white/10 hover:bg-white/15 flex flex-col items-center gap-1 transition">
+              <svg class="w-4 h-4 text-goldLight" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+              <span class="text-[10px] font-medium">استرداد أموال</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- شريط محاكاة التشغيل وتحصيل عوائد الشهر -->
+        <div class="surface-card rounded-xl p-3 flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-lg bg-emeraldDeep/10 dark:bg-emeraldAccent/10 flex items-center justify-center text-emeraldDeep dark:text-emeraldAccent">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <h3 class="text-xs font-bold text-obsidian dark:text-white">دورة تحصيل الأرباح الشهرية</h3>
+                <label class="inline-flex items-center gap-1 text-[10px] text-goldDark dark:text-goldLight cursor-pointer">
+                  <input type="checkbox" id="autoGoldToggle" onchange="toggleAutoGold(this.checked)" class="rounded accent-goldBullion">
+                  <span>تحويل تلقائي لذهب 24K</span>
+                </label>
+              </div>
+              <p class="text-[10px] text-slateMuted dark:text-slate-400">تُحصل يومياً من ماكينات نقاط البيع (POS) للتجار</p>
+            </div>
+          </div>
+          <button onclick="simulateMonthCycle()" class="px-3 py-2 rounded-lg bg-emeraldDeep text-white text-[11px] font-semibold hover:bg-emeraldMid transition shrink-0 shadow-sm">
+            صرف عائد الشهر +
+          </button>
+        </div>
+
+        <!-- رادار التشغيل الحي للأصول (Live IoT Telemetry) -->
+        <div class="surface-card rounded-2xl p-4">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emeraldAccent live-dot"></span>
+              <h3 class="text-xs font-bold text-obsidian dark:text-white">رادار الأصول الحية (IoT & POS Live)</h3>
+            </div>
+            <span class="text-[10px] text-slateMuted font-num">تتبع GPS ومبيعات لحظي</span>
+          </div>
+
+          <div id="iotTelemetryList" class="space-y-2.5"></div>
+        </div>
+
+        <!-- مصفوفة الأدوات الهيكلية المبتكرة (6 Bespoke Financial Modules) -->
+        <div>
+          <div class="flex items-center justify-between mb-2.5">
+            <h3 class="text-xs font-bold text-obsidian dark:text-white">الأدوات الاستثمارية والتحوطية الحصرية</h3>
+            <span class="text-[10px] text-slateMuted">بدون التزام أو مبالغ كبيرة</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <!-- 1. مقايضة الأصول 0% -->
+            <button onclick="openSwapModal()" class="surface-card rounded-xl p-3 text-right hover:border-goldBullion transition group">
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="w-7 h-7 rounded-lg bg-goldBullion/15 text-goldDark dark:text-goldLight flex items-center justify-center">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/></svg>
+                </div>
+                <span class="text-[9px] font-num px-1.5 py-0.5 rounded bg-emeraldAccent/15 text-emerald-700 dark:text-emeraldAccent font-bold">0% عمولة</span>
+              </div>
+              <h4 class="text-xs font-bold text-obsidian dark:text-white">مقايضة الأصول الفورية</h4>
+              <p class="text-[10px] text-slateMuted mt-0.5">حول جرامات الذهب لحصة إجارة مدرة للدخل أو العكس</p>
+            </button>
+
+            <!-- 2. سيولة طوارئ بضمان الذهب -->
+            <button onclick="openQardModal()" class="surface-card rounded-xl p-3 text-right hover:border-goldBullion transition group">
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="w-7 h-7 rounded-lg bg-emeraldDeep/10 dark:bg-emeraldAccent/15 text-emeraldDeep dark:text-emeraldAccent flex items-center justify-center">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                </div>
+                <span class="text-[9px] font-num px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-700 dark:text-sky-300 font-bold">قرض حسن 0%</span>
+              </div>
+              <h4 class="text-xs font-bold text-obsidian dark:text-white">سيولة طوارئ بضمان الذهب</h4>
+              <p class="text-[10px] text-slateMuted mt-0.5">اسحب كاش فوري دون بيع سبيكتك ويُسدد من عوائدك</p>
+            </button>
+
+            <!-- 3. درع الأمان المالي -->
+            <button onclick="openSafetyShieldModal()" class="surface-card rounded-xl p-3 text-right hover:border-goldBullion transition group">
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center justify-center">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286zm0 13.036h.008v.008H12v-.008z"/></svg>
+                </div>
+                <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-300 font-bold">عدم المغامرة</span>
+              </div>
+              <h4 class="text-xs font-bold text-obsidian dark:text-white">حاسبة الفائض الآمن</h4>
+              <p class="text-[10px] text-slateMuted mt-0.5">افصل مصاريف طوارئ بيتك قبل استثمار أي جنيه</p>
+            </button>
+
+            <!-- 4. محاكي الأزمات والضمانات -->
+            <button onclick="openStressTestModal()" class="surface-card rounded-xl p-3 text-right hover:border-goldBullion transition group">
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="w-7 h-7 rounded-lg bg-rose-500/15 text-rose-700 dark:text-rose-400 flex items-center justify-center">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                </div>
+                <span class="text-[9px] px-1.5 py-0.5 rounded bg-rose-500/15 text-rose-700 dark:text-rose-300 font-bold">تكافلي 100%</span>
+              </div>
+              <h4 class="text-xs font-bold text-obsidian dark:text-white">محاكي المخاطر والاسترداد</h4>
+              <p class="text-[10px] text-slateMuted mt-0.5">ماذا يحدث لو تعطلت المعدة أو تعثر التاجر؟</p>
+            </button>
+          </div>
+        </div>
+
+        <!-- سجل آخر العمليات الموثقة -->
+        <div class="surface-card rounded-2xl p-4">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-xs font-bold text-obsidian dark:text-white">دفتر القيود والمعاملات الموثقة</h3>
+            <button onclick="switchInvTab('family')" class="text-[11px] text-emeraldDeep dark:text-emeraldAccent font-semibold">عرض الكل</button>
+          </div>
+          <div id="recentLedgerList" class="space-y-2.5"></div>
+        </div>
+      </section>
+
+      <!-- الشاشة 2: خزينة الذهب والتداول (Gold Bullion & ROSCA) -->
+      <section id="invTab-gold" class="p-4 space-y-4 hidden">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-base font-bold text-obsidian dark:text-white">خزينة الذهب عيار 24 والجمعيات</h2>
+            <p class="text-[11px] text-slateMuted">سبائك مخصصة بأرقام تسلسلية مع خيار الاستلام العيني</p>
+          </div>
+          <span class="text-[10px] font-num px-2 py-1 rounded bg-goldBullion/20 text-goldDark dark:text-goldLight font-bold">999.9 Swiss/EG</span>
+        </div>
+
+        <!-- مكتب التداول الفوري للذهب -->
+        <div class="surface-card rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex gap-1 bg-alabaster dark:bg-charcoal p-1 rounded-xl">
+              <button id="goldModeBuy" onclick="setGoldTradeMode('buy')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-obsidian text-white dark:bg-goldBullion dark:text-obsidian transition">شراء وتخزين</button>
+              <button id="goldModeSell" onclick="setGoldTradeMode('sell')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold text-slateMuted transition">بيع وتسييل فوري</button>
+            </div>
+            <div class="text-left">
+              <span class="text-[10px] text-slateMuted block">رصيدك بالخزينة</span>
+              <span id="vaultGoldBalanceLabel" class="num text-sm font-extrabold text-goldDark dark:text-goldLight">25.50 جم</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div>
+              <label class="text-[11px] text-slateMuted block mb-1">الوزن بالجرام (عيار 24)</label>
+              <input type="number" id="goldGramsInput" value="1.0" step="0.1" min="0.05" oninput="syncGoldCalc('grams')" class="w-full px-3 py-2 rounded-xl bg-alabaster dark:bg-charcoal border border-black/10 dark:border-white/10 num font-bold text-sm focus:outline-none focus:border-goldBullion">
+            </div>
+            <div>
+              <label class="text-[11px] text-slateMuted block mb-1">القيمة المقابلة (ج.م)</label>
+              <input type="number" id="goldAmountInput" value="4120" step="100" oninput="syncGoldCalc('amount')" class="w-full px-3 py-2 rounded-xl bg-alabaster dark:bg-charcoal border border-black/10 dark:border-white/10 num font-bold text-sm focus:outline-none focus:border-goldBullion">
+            </div>
+          </div>
+
+          <!-- أزرار أوزان سريعة شاملة حصالة الفكة الذهبية -->
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <button onclick="setQuickGoldGrams(0.06)" class="text-[10px] px-2.5 py-1 rounded-lg bg-goldBullion/15 text-goldDark dark:text-goldLight font-semibold">حصالة فكة (60 ملجم ~ 250 ج)</button>
+            <button onclick="setQuickGoldGrams(0.5)" class="text-[10px] px-2.5 py-1 rounded-lg bg-alabaster dark:bg-charcoal font-num font-semibold">0.5 جم</button>
+            <button onclick="setQuickGoldGrams(1)" class="text-[10px] px-2.5 py-1 rounded-lg bg-alabaster dark:bg-charcoal font-num font-semibold">1 جم</button>
+            <button onclick="setQuickGoldGrams(5)" class="text-[10px] px-2.5 py-1 rounded-lg bg-alabaster dark:bg-charcoal font-num font-semibold">5 جم</button>
+            <button onclick="setQuickGoldGrams(10)" class="text-[10px] px-2.5 py-1 rounded-lg bg-alabaster dark:bg-charcoal font-num font-semibold">10 جم</button>
+          </div>
+
+          <!-- صندوق الشفافية الشرعي -->
+          <div class="bg-alabaster/70 dark:bg-charcoal/60 rounded-xl p-3 text-[11px] space-y-1 border border-black/5 dark:border-white/5">
+            <div class="flex justify-between">
+              <span class="text-slateMuted">سعر جرام الذهب عيار 24 اللحظي:</span>
+              <span id="calcGoldUnitPrice" class="num font-semibold">4,120 ج.م</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slateMuted">أجر الوكالة وحفظ الخزينة المؤمنة (0.5%):</span>
+              <span id="calcGoldFee" class="num font-semibold">21 ج.م</span>
+            </div>
+            <div class="flex justify-between pt-1 border-t border-black/10 dark:border-white/10 font-bold text-obsidian dark:text-white">
+              <span>الصافي الإجمالي للتنفيذ الفوري (تقابض حكمي):</span>
+              <span id="calcGoldTotal" class="num text-goldDark dark:text-goldLight">4,141 ج.م</span>
+            </div>
+          </div>
+
+          <button onclick="executeGoldTrade()" id="goldActionBtn" class="w-full py-2.5 rounded-xl bullion-gradient text-obsidian font-bold text-xs shadow-sm hover:opacity-95 transition">
+            تأكيد شراء وتخصيص الذهب بالخزينة
+          </button>
+        </div>
+
+        <!-- شهادات السبائك العينية المملوكة -->
+        <div class="surface-card rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold text-obsidian dark:text-white">شهادات الحيازة العينية المخصصة باسمك</h3>
+            <button onclick="requestPhysicalGoldDelivery()" class="text-[10px] px-2.5 py-1 rounded-lg bg-emeraldDeep text-white font-semibold">
+              طلب استلام سبيكة عينية
+            </button>
+          </div>
+          <div id="goldBarsList" class="space-y-2"></div>
+        </div>
+
+        <!-- جمعيات الذهب التشاركية (Gold-Backed ROSCA) -->
+        <div class="surface-card rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-xs font-bold text-obsidian dark:text-white">جمعيات الذهب التشاركية (حماية من التضخم)</h3>
+              <p class="text-[10px] text-slateMuted">القسط والقبض مقومان بالجرام عيار 24 وليس بالعملة الورقية</p>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-emeraldAccent/15 text-emerald-700 dark:text-emeraldAccent font-bold">0% تآكل</span>
+          </div>
+          <div id="goldRoscaList" class="space-y-2.5"></div>
+        </div>
+      </section>
+
+      <!-- الشاشة 3: الأصول التشغيلية (Ijara, Murabaha & Co-Investing) -->
+      <section id="invTab-assets" class="p-4 space-y-4 hidden">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-base font-bold text-obsidian dark:text-white">سوق الأصول التشغيلية الحقيقية</h2>
+            <p class="text-[11px] text-slateMuted">إجارة معدات منتجة، مرابحة طلبيات سريعة، وغرف تشاركية</p>
+          </div>
+        </div>
+
+        <!-- سلة التحوط الثلاثي للمغتربين -->
+        <div class="obsidian-gradient text-white rounded-2xl p-4 border border-goldBullion/30">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-[10px] px-2 py-0.5 rounded bg-goldBullion text-obsidian font-bold">مفضل للمغتربين</span>
+            <span class="text-[11px] font-num text-goldLight">توزيع آلي بضغطة واحدة</span>
+          </div>
+          <h3 class="text-sm font-bold">سلة التحوط الثلاثي الذكية (Auto-Hedge Basket)</h3>
+          <p class="text-[11px] text-slate-300 mt-1">توزع مبلغك فوراً: 40% سبائك ذهب 24K + 35% إجارة معدات طبية وكافيهات + 25% مرابحة فواتير سريعة الدوران.</p>
+          <div class="flex items-center gap-2 mt-3">
+            <input type="number" id="hedgeAmountInput" value="20000" step="1000" class="w-32 px-3 py-1.5 rounded-lg bg-white/10 border border-white/20 text-white num text-xs font-bold">
+            <button onclick="executeAutoHedgeBasket()" class="flex-1 py-2 rounded-lg bullion-gradient text-obsidian font-bold text-xs">
+              تفعيل سلة التحوط الآن
+            </button>
+          </div>
+        </div>
+
+        <!-- فلاتر الفرص -->
+        <div class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+          <button onclick="filterOpportunities('all')" id="oppFilter-all" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-obsidian text-white dark:bg-goldBullion dark:text-obsidian shrink-0">جميع الفرص</button>
+          <button onclick="filterOpportunities('ijara')" id="oppFilter-ijara" class="px-3 py-1.5 rounded-lg text-xs font-semibold surface-card text-slateMuted shrink-0">إجارة معدات (عائد شهري)</button>
+          <button onclick="filterOpportunities('murabaha')" id="oppFilter-murabaha" class="px-3 py-1.5 rounded-lg text-xs font-semibold surface-card text-slateMuted shrink-0">مرابحة طلبيات (30-45 يوم)</button>
+          <button onclick="filterOpportunities('green')" id="oppFilter-green" class="px-3 py-1.5 rounded-lg text-xs font-semibold surface-card text-slateMuted shrink-0">طاقة وأساطيل ذكية</button>
+        </div>
+
+        <!-- قائمة الفرص الاستثمارية -->
+        <div id="opportunitiesList" class="space-y-3"></div>
+
+        <!-- غرف الاستثمار التشاركي للأصدقاء (Friends Syndicates) -->
+        <div class="surface-card rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-xs font-bold text-obsidian dark:text-white">غرف استثمار الشلة (تملك جماعي من 1,000 ج.م)</h3>
+              <p class="text-[10px] text-slateMuted">تشارك مع أصدقائك المسافرين لامتلاك معدة كاملة مسجلة بأسمائكم</p>
+            </div>
+          </div>
+          <div id="syndicatesList" class="space-y-2.5"></div>
+        </div>
+      </section>
+
+      <!-- الشاشة 4: سوق التخارج الثانوي والعقود (P2P Liquidity & Contracts) -->
+      <section id="invTab-p2p" class="p-4 space-y-4 hidden">
+        <div>
+          <h2 class="text-base font-bold text-obsidian dark:text-white">سوق السيولة الفورية والعقود الموثقة</h2>
+          <p class="text-[11px] text-slateMuted">استرداد رأس المال وتسييل الحصص في أي وقت دون انتظار نهاية العقد</p>
+        </div>
+
+        <!-- حصصي المملوكة والعقود -->
+        <div class="surface-card rounded-2xl p-4 space-y-3">
+          <h3 class="text-xs font-bold text-obsidian dark:text-white">أصولك وعقودك القائمة (قابلة للتسييل الفوري)</h3>
+          <div id="myOwnedAssetsList" class="space-y-2.5"></div>
+        </div>
+
+        <!-- لوحة عروض السوق الثانوي P2P -->
+        <div class="surface-card rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-xs font-bold text-obsidian dark:text-white">فرص التنازل الفوري من مستثمرين آخرين (P2P)</h3>
+              <p class="text-[10px] text-slateMuted">اشترِ حصة شغالة بالفعل بخصم تشجيعي واستلم عائدها هذا الشهر</p>
+            </div>
+            <span class="text-[10px] font-num px-2 py-0.5 rounded bg-emeraldAccent/15 text-emerald-700 dark:text-emeraldAccent font-bold">تسييل فوري</span>
+          </div>
+          <div id="p2pMarketList" class="space-y-2.5"></div>
+        </div>
+      </section>
+
+      <!-- الشاشة 5: محفظة الأسرة والضمانات (Expat Family & Protection) -->
+      <section id="invTab-family" class="p-4 space-y-4 hidden">
+        <div>
+          <h2 class="text-base font-bold text-obsidian dark:text-white">محفظة الأسرة، البطاقة الذكية، والوكيل العائلي</h2>
+          <p class="text-[11px] text-slateMuted">صممت خصيصاً للمغترب لربط عوائد أصوله بنفقات أسرته في مصر بأمان</p>
+        </div>
+
+        <!-- بطاقة أصول العائلية المدعومة بالعوائد -->
+        <div class="obsidian-gradient text-white rounded-2xl p-5 border border-goldBullion/40 shadow-lg relative overflow-hidden">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <span class="text-[10px] uppercase tracking-widest text-goldLight block">OSOOL FAMILY METAL CARD</span>
+              <h3 class="text-sm font-bold mt-0.5">بطاقة صرف العوائد والذهب العائلية</h3>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-emeraldAccent/20 text-emeraldAccent text-[10px] font-bold">تصرف من الربح فقط</span>
+          </div>
+          <p class="num text-base tracking-widest font-bold text-goldLight mb-3">5399 •••• •••• 8410</p>
+          <div class="flex items-center justify-between text-[11px] text-slate-300 pt-2 border-t border-white/10">
+            <span>المستفيد: الأسرة (أم ليلى)</span>
+            <span class="num">الحد الشهري من العائد: <strong id="cardLimitDisplay" class="text-white">4,500 ج.م</strong></span>
+          </div>
+        </div>
+
+        <!-- سداد فواتير الأسرة بخصم الكاش وتحويل الفكة لذهب -->
+        <div class="surface-card rounded-2xl p-4 space-y-3">
+          <h3 class="text-xs font-bold text-obsidian dark:text-white">سداد فواتير الأسرة من الأرباح (+ كاش باك ذهب 24K)</h3>
+          <div class="grid grid-cols-3 gap-2">
+            <button onclick="payFamilyBill('مدرسة وحضانة', 2200, 0.08)" class="p-2.5 rounded-xl bg-alabaster dark:bg-charcoal text-right hover:border-goldBullion border border-transparent transition">
+              <span class="text-xs font-bold block text-obsidian dark:text-white">قسط تعليم</span>
+              <span class="num text-[10px] text-slateMuted block">2,200 ج.م</span>
+              <span class="text-[9px] text-goldDark dark:text-goldLight font-semibold">+8% ذهب 24K</span>
+            </button>
+            <button onclick="payFamilyBill('تأمين وصيدليات', 850, 0.10)" class="p-2.5 rounded-xl bg-alabaster dark:bg-charcoal text-right hover:border-goldBullion border border-transparent transition">
+              <span class="text-xs font-bold block text-obsidian dark:text-white">رعاية صحية</span>
+              <span class="num text-[10px] text-slateMuted block">850 ج.م</span>
+              <span class="text-[9px] text-goldDark dark:text-goldLight font-semibold">+10% ذهب 24K</span>
+            </button>
+            <button onclick="payFamilyBill('مقاضي البيت', 1500, 0.07)" class="p-2.5 rounded-xl bg-alabaster dark:bg-charcoal text-right hover:border-goldBullion border border-transparent transition">
+              <span class="text-xs font-bold block text-obsidian dark:text-white">خزين الشهر</span>
+              <span class="num text-[10px] text-slateMuted block">1,500 ج.م</span>
+              <span class="text-[9px] text-goldDark dark:text-goldLight font-semibold">+7% ذهب 24K</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- الوكيل العائلي الموثق وسهم البركة -->
+        <div class="surface-card rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-xs font-bold text-obsidian dark:text-white">الوكيل العائلي الموثق للطوارئ (Beneficiary Nominee)</h3>
+              <p class="text-[10px] text-slateMuted">الشخص المعتمد لاستلام الأصول والذهب نيابة عنك بموجب توكيل رسمي</p>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-emeraldDeep/10 text-emeraldDeep dark:text-emeraldAccent font-bold">موثق</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" id="nomineeNameInput" value="آية (أم ليلى) - الزوجة" class="px-3 py-2 rounded-xl bg-alabaster dark:bg-charcoal text-xs font-semibold border border-black/10 dark:border-white/10">
+            <input type="text" id="nomineePhoneInput" value="+20 100 842 9910" class="px-3 py-2 rounded-xl bg-alabaster dark:bg-charcoal num text-xs font-semibold border border-black/10 dark:border-white/10">
+          </div>
+          <div class="flex items-center justify-between pt-2 border-t border-black/5 dark:border-white/5">
+            <span class="text-[11px] font-medium">سهم البركة (وقف اختياري من صافي الربح الشهري فقط):</span>
+            <select id="waqfPercentSelect" onchange="updateWaqfPercent(this.value)" class="px-2.5 py-1 rounded-lg bg-alabaster dark:bg-charcoal text-xs font-num font-bold">
+              <option value="0">0%</option>
+              <option value="5" selected>5% صدقة جارية</option>
+              <option value="10">10% صدقة جارية</option>
+            </select>
+          </div>
+          <button onclick="saveNomineeSettings()" class="w-full py-2 rounded-xl bg-obsidian text-white dark:bg-white dark:text-obsidian text-xs font-bold">
+            حفظ وتوثيق بيانات الوكيل العائلي
+          </button>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- البوابة 2: بوابة التجار وطالبي التمويل (B2B MERCHANT PORTAL) -->
+    <!-- ========================================== -->
+    <div id="roleView-merchant" class="flex-1 overflow-y-auto no-scrollbar p-4 space-y-4 hidden">
+      <div class="obsidian-gradient text-white rounded-2xl p-4 border border-white/10">
+        <span class="text-[10px] px-2 py-0.5 rounded bg-goldBullion text-obsidian font-bold">الجانب الثاني من البيزنس موديل (B2B)</span>
+        <h2 class="text-base font-bold mt-1.5">بوابة تمويل التجار والعيادات بدون قروض ربوية</h2>
+        <p class="text-[11px] text-slate-300 mt-1">بدل الاقتراض البنكي بالربا، يشتري مستثمرو "أصول" المعدة أو البضاعة ويؤجرونها أو يبيعونها لك بالمرابحة مع تحصيل آلي مرن من ماكينة نقاط البيع (POS Split).</p>
+      </div>
+
+      <!-- آلية الحماية والتحصيل الآلي POS Split -->
+      <div class="surface-card rounded-2xl p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold text-obsidian dark:text-white">نظام الاستقطاع الآلي من المبيعات (POS Auto-Split)</h3>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-emeraldAccent/15 text-emerald-700 dark:text-emeraldAccent font-bold">متصل بـ Fawry / Paymob</span>
+        </div>
+        <p class="text-[11px] text-slateMuted">كل عملية دفع بالفيزا داخل الكافيه أو العيادة يُقتطع منها تلقائياً (مثلاً 12%) لحساب خزينة المستثمرين قبل التسوية، مما يقضي على مخاطر تعثر التاجر.</p>
+        <div class="grid grid-cols-3 gap-2 text-center bg-alabaster dark:bg-charcoal p-3 rounded-xl">
+          <div>
+            <span class="text-[10px] text-slateMuted block">مبيعات التاجر اليوم</span>
+            <span class="num text-xs font-bold text-obsidian dark:text-white">18,400 ج.م</span>
+          </div>
+          <div>
+            <span class="text-[10px] text-slateMuted block">حصة المستثمرين (12%)</span>
+            <span class="num text-xs font-bold text-emerald-600">2,208 ج.م</span>
+          </div>
+          <div>
+            <span class="text-[10px] text-slateMuted block">صافي التاجر الفوري</span>
+            <span class="num text-xs font-bold text-goldDark dark:text-goldLight">16,192 ج.م</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- نموذج تقديم طلب تمويل معدة أو طلبية جديدة -->
+      <div class="surface-card rounded-2xl p-4 space-y-3">
+        <h3 class="text-xs font-bold text-obsidian dark:text-white">تقديم طلب تمويل أصل جديد (ينزل في سوق المستثمرين)</h3>
+        <div class="space-y-2.5">
+          <div>
+            <label class="text-[11px] text-slateMuted block mb-1">اسم المنشأة والمعدة / البضاعة المطلوبة</label>
+            <input type="text" id="merchTitleInput" placeholder="مثال: جهاز ليزر طبي - عيادة ديرما كير" class="w-full px-3 py-2 rounded-xl bg-alabaster dark:bg-charcoal text-xs font-semibold border border-black/10 dark:border-white/10">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[11px] text-slateMuted block mb-1">نوع العقد الشرعي</label>
+              <select id="merchTypeInput" class="w-full px-3 py-2 rounded-xl bg-alabaster dark:bg-charcoal text-xs font-semibold border border-black/10 dark:border-white/10">
+                <option value="ijara">إجارة منتهية بالتمليك</option>
+                <option value="murabaha">مرابحة بضاعة سريعة</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[11px] text-slateMuted block mb-1">قيمة الأصل المطلوب (ج.م)</label>
+              <input type="number" id="merchCostInput" value="90000" class="w-full px-3 py-2 rounded-xl bg-alabaster dark:bg-charcoal num text-xs font-bold border border-black/10 dark:border-white/10">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[11px] text-slateMuted block mb-1">العائد السنوي المتوقع للمستثمر (%)</label>
+              <input type="number" id="merchRoiInput" value="23.5" step="0.5" class="w-full px-3 py-2 rounded-xl bg-alabaster dark:bg-charcoal num text-xs font-bold border border-black/10 dark:border-white/10">
+            </div>
+            <div>
+              <label class="text-[11px] text-slateMuted block mb-1">الحد الأدنى لدخول الشاب (ج.م)</label>
+              <input type="number" id="merchMinInput" value="3000" step="500" class="w-full px-3 py-2 rounded-xl bg-alabaster dark:bg-charcoal num text-xs font-bold border border-black/10 dark:border-white/10">
+            </div>
+          </div>
+          <button onclick="submitMerchantRequest()" class="w-full py-2.5 rounded-xl bg-emeraldDeep text-white text-xs font-bold hover:bg-emeraldMid transition">
+            إرسال الطلب للفحص الشرعي وإدراجه للمستثمرين
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- البوابة 3: الرقابة الشرعية والتدقيق (SHARIA & AUDIT PORTAL) -->
+    <!-- ========================================== -->
+    <div id="roleView-sharia" class="flex-1 overflow-y-auto no-scrollbar p-4 space-y-4 hidden">
+      <div class="vault-gradient text-white rounded-2xl p-4 border border-white/10">
+        <span class="text-[10px] px-2 py-0.5 rounded bg-goldBullion text-obsidian font-bold">الامتثال الشرعي والقانوني الكامل</span>
+        <h2 class="text-base font-bold mt-1.5">بوابة الحوكمة الشرعية، محاضر الجرد، وحاسبة الزكاة</h2>
+        <p class="text-[11px] text-slate-300 mt-1">جميع العقود مصاغة وفق معايير هيئة المحاسبة والمراجعة للمؤسسات المالية الإسلامية (AAOIFI).</p>
+      </div>
+
+      <!-- القواعد الشرعية الأربع الحاكمة -->
+      <div class="surface-card rounded-2xl p-4 space-y-2.5">
+        <h3 class="text-xs font-bold text-obsidian dark:text-white">الضوابط الشرعية الحاكمة في "أصول"</h3>
+        <div class="space-y-2 text-[11px]">
+          <div class="p-2.5 rounded-xl bg-alabaster dark:bg-charcoal">
+            <strong class="text-emeraldDeep dark:text-emeraldAccent block">1. عدم ضمان رأس المال بعائد مقطوع ثابث:</strong>
+            <span class="text-slateMuted">الأرباح ناتجة عن إيجار حقيقي للمعدات أو هامش مرابحة معلوم، وليست فائدة على قرض.</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-alabaster dark:bg-charcoal">
+            <strong class="text-emeraldDeep dark:text-emeraldAccent block">2. التقابض الفوري في الذهب (يداً بيد / قبض حكمي):</strong>
+            <span class="text-slateMuted">يُخصص رقم السبيكة التسلسلي في الخزينة فور الدفع ويصدر إيصال حيازة فوري بلا تأجيل.</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-alabaster dark:bg-charcoal">
+            <strong class="text-emeraldDeep dark:text-emeraldAccent block">3. تملك السلعة قبل بيعها بالمرابحة:</strong>
+            <span class="text-slateMuted">تشتري المنصة البضاعة أولاً من المورد وتدخل في ضمانها قبل تسليمها للتاجر.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- حاسبة الزكاة التفصيلية (الأصول المؤجرة vs الذهب والمرابحة) -->
+      <div class="surface-card rounded-2xl p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold text-obsidian dark:text-white">حاسبة زكاة محفظتك الشرعية التلقائية</h3>
+          <span class="text-[10px] font-num px-2 py-0.5 rounded bg-goldBullion/20 text-goldDark dark:text-goldLight font-bold">نصاب 85 جم ذهب</span>
+        </div>
+        <div id="shariaZakatBreakdown" class="space-y-2 text-xs"></div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- البوابة 4: غرفة عمليات المؤسس (FOUNDER COMMAND CENTER) -->
+    <!-- ========================================== -->
+    <div id="roleView-founder" class="flex-1 overflow-y-auto no-scrollbar p-4 space-y-4 hidden">
+      <div class="obsidian-gradient text-white rounded-2xl p-4 border border-goldBullion/30">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] px-2 py-0.5 rounded bg-goldBullion text-obsidian font-bold">لوحة تحكم المؤسس (FLYNIXES Tech)</span>
+          <span class="text-[10px] font-num text-emeraldAccent">نموذج ربح 4 مصادر حلال</span>
+        </div>
+        <h2 class="text-base font-bold mt-1.5">مركز إدارة المحافظ، العمولات، وتقارير الشفافية</h2>
+        <p class="text-[11px] text-slate-300 mt-1">تحكم في تسعير الذهب، اعتمد فرص التجار، واحسب أرباحك كمدير للمنصة عند التوسع مع أصدقائك.</p>
+      </div>
+
+      <!-- حاسبة أرباح البيزنس موديل للمؤسس -->
+      <div class="surface-card rounded-2xl p-4 space-y-3">
+        <h3 class="text-xs font-bold text-obsidian dark:text-white">حاسبة إيرادات المؤسس (Unit Economics & Scale)</h3>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-[10px] text-slateMuted block mb-1">عدد المستثمرين النشطين</label>
+            <input type="number" id="founderUsersInput" value="50" oninput="calcFounderRevenue()" class="w-full px-3 py-1.5 rounded-xl bg-alabaster dark:bg-charcoal num text-xs font-bold">
+          </div>
+          <div>
+            <label class="text-[10px] text-slateMuted block mb-1">متوسط محفظة الفرد (ج.م)</label>
+            <input type="number" id="founderAvgPortfolio" value="120000" step="10000" oninput="calcFounderRevenue()" class="w-full px-3 py-1.5 rounded-xl bg-alabaster dark:bg-charcoal num text-xs font-bold">
+          </div>
+        </div>
+        <div id="founderRevenueBox" class="bg-alabaster dark:bg-charcoal rounded-xl p-3 space-y-1.5 text-[11px]"></div>
+      </div>
+
+      <!-- التحكم المباشر في سعر الذهب وإصدار التقرير الشهري -->
+      <div class="surface-card rounded-2xl p-4 space-y-3">
+        <h3 class="text-xs font-bold text-obsidian dark:text-white">إدارة التسعير وإصدار التقرير الشهري للشباب</h3>
+        <div class="flex items-center gap-2">
+          <input type="number" id="adminGoldPriceInput" value="4120" class="flex-1 px-3 py-2 rounded-xl bg-alabaster dark:bg-charcoal num text-xs font-bold">
+          <button onclick="updateGoldPriceFromAdmin()" class="px-4 py-2 rounded-xl bg-obsidian text-white dark:bg-goldBullion dark:text-obsidian text-xs font-bold">
+            تحديث سعر الذهب
+          </button>
+        </div>
+        <button onclick="copyMonthlyFounderReport()" class="w-full py-2.5 rounded-xl bg-emeraldDeep text-white text-xs font-bold flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5A3.375 3.375 0 006.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0015 2.25h-1.5a2.251 2.251 0 00-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 00-9-9z"/></svg>
+          نسخ تقرير الشفافية الشهري الموثق (لواتساب المستثمرين)
+        </button>
+      </div>
+    </div>
+
+    <!-- شريط التنقل السفلي لتطبيق المستثمر (Bottom Navigation Bar) -->
+    <nav id="investorBottomNav" class="absolute bottom-0 inset-x-0 bg-white/95 dark:bg-charcoal/95 backdrop-blur-md border-t border-black/10 dark:border-white/10 px-2 py-2 flex items-center justify-around z-30">
+      <button onclick="switchInvTab('home')" id="navBtn-home" class="flex flex-col items-center gap-1 text-emeraldDeep dark:text-goldBullion font-bold">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
+        <span class="text-[10px]">المحفظة</span>
+      </button>
+      <button onclick="switchInvTab('gold')" id="navBtn-gold" class="flex flex-col items-center gap-1 text-slateMuted font-medium">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375"/></svg>
+        <span class="text-[10px]">خزينة الذهب</span>
+      </button>
+      <button onclick="switchInvTab('assets')" id="navBtn-assets" class="flex flex-col items-center gap-1 text-slateMuted font-medium">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/></svg>
+        <span class="text-[10px]">الأصول والفرص</span>
+      </button>
+      <button onclick="switchInvTab('p2p')" id="navBtn-p2p" class="flex flex-col items-center gap-1 text-slateMuted font-medium">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/></svg>
+        <span class="text-[10px]">تسييل وعقود</span>
+      </button>
+      <button onclick="switchInvTab('family')" id="navBtn-family" class="flex flex-col items-center gap-1 text-slateMuted font-medium">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+        <span class="text-[10px]">الأسرة والضمان</span>
+      </button>
+    </nav>
+
+    <!-- نافذة منبثقة موحدة (Dynamic Institutional Modal) -->
+    <div id="appModal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+      <div class="w-full max-w-[400px] bg-white dark:bg-charcoal rounded-2xl p-5 shadow-2xl border border-black/10 dark:border-white/10 max-h-[88vh] overflow-y-auto">
+        <div class="flex items-center justify-between pb-3 border-b border-black/10 dark:border-white/10 mb-3">
+          <h3 id="modalTitle" class="text-sm font-bold text-obsidian dark:text-white">تفاصيل العملية</h3>
+          <button onclick="closeModal()" class="w-7 h-7 rounded-lg bg-alabaster dark:bg-obsidian flex items-center justify-center text-slateMuted">✕</button>
+        </div>
+        <div id="modalBody" class="space-y-3 text-xs"></div>
+      </div>
+    </div>
+
+    <!-- إشعار علوي أنيق (Toast Notification) -->
+    <div id="toastBox" class="fixed top-16 left-1/2 -translate-x-1/2 bg-obsidian text-white px-4 py-2.5 rounded-xl shadow-xl border border-goldBullion/40 text-xs font-semibold z-50 hidden items-center gap-2">
+      <span class="w-2 h-2 rounded-full bg-emeraldAccent"></span>
+      <span id="toastText">تم تنفيذ العملية بنجاح</span>
+    </div>
+
+  </div>
+
+  <script>
+    // الحالة المركزية للتطبيق (State Management)
+    const state = {
+      currency: 'EGP',
+      rates: { EGP: 1, SAR: 0.076, AED: 0.075, USD: 0.0204 },
+      symbols: { EGP: 'ج.م', SAR: 'ر.س', AED: 'د.إ', USD: '$' },
+      privacy: false,
+      autoGold: false,
+      waqfPercent: 5,
+      goldPrice24: 4120,
+      goldTradeMode: 'buy',
+      cashBalance: 35560,
+      goldGrams: 25.50,
+      oppFilter: 'all',
+      goldBars: [
+        { id: 'BTC-992841-EG', weight: 10.0, vault: 'خزينة Brinks المعتمدة - القاهرة', purity: '999.9 (24K)' },
+        { id: 'BTC-992910-EG', weight: 10.0, vault: 'خزينة Brinks المعتمدة - القاهرة', purity: '999.9 (24K)' },
+        { id: 'OSL-FRAC-24K', weight: 5.50, vault: 'حساب الكسور المجمع الموثق', purity: '999.9 (24K)' }
+      ],
+      ownedAssets: [
+        {
+          id: 'AST-101',
+          title: 'ماكينة قهوة إيطالي La Marzocco - كافيه التجمع',
+          type: 'إجارة منتهية بالتمليك',
+          amount: 45000,
+          monthlyReturn: 860,
+          roi: 22.9,
+          serial: 'LMZ-2026-884',
+          takaful: 'TAK-99201',
+          posToday: '68 كوب اليوم (+29 ج.م نصيبك)',
+          gps: 'التجمع الخامس - شارع التسعين'
+        },
+        {
+          id: 'AST-102',
+          title: 'جهاز سونار رباعي الأبعاد - مركز النيل الطبي',
+          type: 'إجارة معدات طبية',
+          amount: 63000,
+          monthlyReturn: 1210,
+          roi: 23.0,
+          serial: 'GE-MED-4410',
+          takaful: 'TAK-99412',
+          posToday: '9 فحوصات اليوم (+41 ج.م نصيبك)',
+          gps: 'المهندسين - الجيزة'
+        }
+      ],
+      opportunities: [
+        {
+          id: 'OPP-1',
+          category: 'ijara',
+          title: 'وحدة أسنان رقمية متكاملة — عيادات الشروق',
+          typeLabel: 'إجارة معدات (36 شهراً)',
+          target: 120000,
+          funded: 95000,
+          minAmount: 2500,
+          roi: 23.5,
+          takaful: 'وثيقة تأمين تكافلي شاملة ضد الأعطال #TK-402',
+          collateral: 'رهن حيازي للمعدة + استقطاع POS يومي 15%'
+        },
+        {
+          id: 'OPP-2',
+          category: 'murabaha',
+          title: 'تمويل طلبية أدوية ومستلزمات سريعة الدوران — سلاسل صيدليات',
+          typeLabel: 'مرابحة فواتير (دورة 35 يوماً)',
+          target: 80000,
+          funded: 64000,
+          minAmount: 2000,
+          roi: 21.8,
+          takaful: 'بضاعة مسلمة بمخازن معتمدة وفواتير مقبولة الدفع',
+          collateral: 'شيكات بنكية + تحصيل مباشر من نقاط البيع'
+        },
+        {
+          id: 'OPP-3',
+          category: 'green',
+          title: 'أسطول 10 بطاريات سكوتر توصيل ذكية (تبديل فوري)',
+          typeLabel: 'إجارة تشغيلية يومية',
+          target: 60000,
+          funded: 42000,
+          minAmount: 1000,
+          roi: 24.2,
+          takaful: 'تتبع GPS ذكي وإيقاف عن بعد + تأمين استبدال',
+          collateral: 'تحصيل يومي إلكتروني من مناديب التوصيل'
+        }
+      ],
+      roscaList: [
+        { id: 'RSC-1', title: 'جمعية الـ 10 جرام عيار 24 (10 شهور)', monthlyGrams: 1.0, totalGrams: 10.0, slot: 'الدور 3 (متاح)', joined: false },
+        { id: 'RSC-2', title: 'جمعية الـ 5 جرام للشباب (10 شهور)', monthlyGrams: 0.5, totalGrams: 5.0, slot: 'الدور 2 (متاح)', joined: true }
+      ],
+      syndicates: [
+        { id: 'SYN-1', title: 'غرفة شلة المغتربين — ماكينة إسبريسو فرع الشيخ زايد', members: '7 من 10 أصدقاء', minShare: 1500, progress: 70 }
+      ],
+      p2pListings: [
+        { id: 'P2P-1', title: 'حصة في جهاز تعقيم طبي (متبقي 14 شهر إجارة)', originalVal: 10000, askPrice: 9650, discount: '3.5%', monthlyYield: 195 }
+      ],
+      ledger: [
+        { title: 'تحصيل عائد إجارة شهري (نقاط بيع POS)', date: 'منذ ساعتين', amount: '+2,070 ج.م', type: 'in' },
+        { title: 'شراء وتخصيص 2.5 جرام ذهب عيار 24', date: 'أمس', amount: '-10,300 ج.م', type: 'out' },
+        { title: 'إيداع سيولة عبر تحويل بنكي دولي', date: 'منذ 3 أيام', amount: '+25,000 ج.م', type: 'in' }
+      ]
+    };
+
+    // دالة تنسيق العملات
+    function fmtMoney(egpVal) {
+      if (state.privacy) return '••••••';
+      const converted = egpVal * state.rates[state.currency];
+      return converted.toLocaleString('en-US', { maximumFractionDigits: state.currency === 'EGP' ? 0 : 2 }) + ' ' + state.symbols[state.currency];
+    }
+
+    function showToast(msg) {
+      const box = document.getElementById('toastBox');
+      document.getElementById('toastText').textContent = msg;
+      box.classList.remove('hidden');
+      box.classList.add('flex');
+      setTimeout(() => {
+        box.classList.add('hidden');
+        box.classList.remove('flex');
+      }, 3200);
+    }
+
+    function openModal(title, htmlContent) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalBody').innerHTML = htmlContent;
+      const modal = document.getElementById('appModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('appModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // تحديث الواجهة الشاملة
+    function renderAll() {
+      const goldVal = state.goldGrams * state.goldPrice24;
+      const opsVal = state.ownedAssets.reduce((s, a) => s + a.amount, 0);
+      const totalWealth = goldVal + opsVal + state.cashBalance;
+      const monthlyYield = state.ownedAssets.reduce((s, a) => s + a.monthlyReturn, 0);
+
+      document.getElementById('liveGoldTicker').textContent = fmtMoney(state.goldPrice24);
+      document.getElementById('totalWealthDisplay').textContent = fmtMoney(totalWealth);
+      document.getElementById('monthlyYieldBadge').textContent = '+' + fmtMoney(monthlyYield) + ' / شهر';
+      document.getElementById('summaryGoldGrams').textContent = state.privacy ? '••• جم' : state.goldGrams.toFixed(2) + ' جم';
+      document.getElementById('summaryOpsValue').textContent = fmtMoney(opsVal);
+      document.getElementById('summaryCashValue').textContent = fmtMoney(state.cashBalance);
+      document.getElementById('vaultGoldBalanceLabel').textContent = state.goldGrams.toFixed(2) + ' جم';
+
+      // تحديث نسب شريط الثروة
+      const gPct = Math.round((goldVal / totalWealth) * 100) || 0;
+      const oPct = Math.round((opsVal / totalWealth) * 100) || 0;
+      const cPct = Math.max(0, 100 - gPct - oPct);
+      document.getElementById('barGold').style.width = gPct + '%';
+      document.getElementById('barOps').style.width = oPct + '%';
+      document.getElementById('barCash').style.width = cPct + '%';
+
+      renderIoTTelemetry();
+      renderLedger();
+      renderGoldSection();
+      renderOpportunities();
+      renderP2PSection();
+      renderShariaZakat(goldVal, opsVal, monthlyYield);
+      calcFounderRevenue();
+      syncGoldCalc('grams');
+    }
+
+    function renderIoTTelemetry() {
+      const container = document.getElementById('iotTelemetryList');
+      container.innerHTML = state.ownedAssets.map(a => `
+        <div class="p-3 rounded-xl bg-alabaster dark:bg-charcoal border border-black/5 dark:border-white/5 flex items-center justify-between gap-2">
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-bold text-obsidian dark:text-white">${a.title}</span>
+            </div>
+            <p class="text-[10px] text-slateMuted mt-0.5">${a.gps} • سيريال: <span class="num">${a.serial}</span></p>
+            <p class="text-[10px] text-emerald-700 dark:text-emeraldAccent font-semibold mt-0.5">${a.posToday}</p>
+          </div>
+          <div class="text-left shrink-0">
+            <span class="num text-xs font-extrabold text-obsidian dark:text-white block">${fmtMoney(a.amount)}</span>
+            <span class="num text-[10px] text-goldDark dark:text-goldLight font-semibold">+${fmtMoney(a.monthlyReturn)}/ش</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderLedger() {
+      const container = document.getElementById('recentLedgerList');
+      container.innerHTML = state.ledger.slice(0, 4).map(item => `
+        <div class="flex items-center justify-between py-2 border-b border-black/5 dark:border-white/5 last:border-0">
+          <div>
+            <p class="text-xs font-semibold text-obsidian dark:text-white">${item.title}</p>
+            <span class="text-[10px] text-slateMuted">${item.date}</span>
+          </div>
+          <span class="num text-xs font-bold ${item.type === 'in' ? 'text-emerald-600 dark:text-emeraldAccent' : 'text-obsidian dark:text-slate-200'}">${item.amount}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderGoldSection() {
+      document.getElementById('goldBarsList').innerHTML = state.goldBars.map(bar => `
+        <div class="p-3 rounded-xl bg-alabaster dark:bg-charcoal flex items-center justify-between border border-goldBullion/20">
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-bold text-obsidian dark:text-white">سبيكة ${bar.weight.toFixed(2)} جم</span>
+              <span class="text-[9px] font-num px-1.5 py-0.5 rounded bg-goldBullion/20 text-goldDark dark:text-goldLight font-bold">${bar.purity}</span>
+            </div>
+            <p class="text-[10px] text-slateMuted mt-0.5">${bar.vault} • رقم: <span class="num">${bar.id}</span></p>
+          </div>
+          <span class="num text-xs font-bold text-obsidian dark:text-white">${fmtMoney(bar.weight * state.goldPrice24)}</span>
+        </div>
+      `).join('');
+
+      document.getElementById('goldRoscaList').innerHTML = state.roscaList.map(r => `
+        <div class="p-3 rounded-xl bg-alabaster dark:bg-charcoal flex items-center justify-between">
+          <div>
+            <h4 class="text-xs font-bold text-obsidian dark:text-white">${r.title}</h4>
+            <p class="text-[10px] text-slateMuted mt-0.5">القسط: <strong class="num">${r.monthlyGrams} جم/شهر</strong> (${fmtMoney(r.monthlyGrams * state.goldPrice24)}) • ${r.slot}</p>
+          </div>
+          <button onclick="joinRosca('${r.id}')" class="px-3 py-1.5 rounded-lg text-[10px] font-bold ${r.joined ? 'bg-emeraldAccent/20 text-emerald-700 dark:text-emeraldAccent' : 'bg-obsidian text-white dark:bg-goldBullion dark:text-obsidian'}">
+            ${r.joined ? 'مشترك بالفعل ✓' : 'احجز دورك'}
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function renderOpportunities() {
+      const list = state.oppFilter === 'all'
+        ? state.opportunities
+        : state.opportunities.filter(o => o.category === state.oppFilter);
+
+      document.getElementById('opportunitiesList').innerHTML = list.map(o => {
+        const pct = Math.min(100, Math.round((o.funded / o.target) * 100));
+        return `
+          <div class="surface-card rounded-2xl p-4 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] px-2 py-0.5 rounded bg-emeraldDeep/10 dark:bg-emeraldAccent/15 text-emeraldDeep dark:text-emeraldAccent font-bold">${o.typeLabel}</span>
+              <span class="num text-xs font-extrabold text-emerald-700 dark:text-emeraldAccent">عائد متوقع ~${o.roi}% سنوياً</span>
+            </div>
+            <h3 class="text-xs font-bold text-obsidian dark:text-white">${o.title}</h3>
+            <p class="text-[10px] text-slateMuted">الضمان: ${o.collateral} • ${o.takaful}</p>
+            <div class="w-full h-1.5 bg-alabaster dark:bg-charcoal rounded-full overflow-hidden">
+              <div class="bg-emeraldDeep dark:bg-emeraldAccent h-full" style="width:${pct}%"></div>
+            </div>
+            <div class="flex items-center justify-between text-[10px] text-slateMuted">
+              <span>مكتمل: <strong class="num text-obsidian dark:text-white">${pct}%</strong> (${fmtMoney(o.funded)})</span>
+              <span>الحد الأدنى: <strong class="num text-obsidian dark:text-white">${fmtMoney(o.minAmount)}</strong></span>
+            </div>
+            <button onclick="openInvestContractModal('${o.id}')" class="w-full py-2 rounded-xl bg-obsidian text-white dark:bg-goldBullion dark:text-obsidian text-xs font-bold hover:opacity-95 transition">
+              معاينة العقد الشرعي والاستثمار
+            </button>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('syndicatesList').innerHTML = state.syndicates.map(s => `
+        <div class="p-3 rounded-xl bg-alabaster dark:bg-charcoal space-y-2">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-bold text-obsidian dark:text-white">${s.title}</h4>
+            <span class="text-[10px] font-num px-2 py-0.5 rounded bg-goldBullion/20 text-goldDark dark:text-goldLight font-bold">${s.members}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] text-slateMuted">سهم الاشتراك يبدأ من <strong class="num">${fmtMoney(s.minShare)}</strong></span>
+            <button onclick="joinSyndicate('${s.id}')" class="px-3 py-1 rounded-lg bg-emeraldDeep text-white text-[10px] font-bold">انضم للشلة</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderP2PSection() {
+      document.getElementById('myOwnedAssetsList').innerHTML = state.ownedAssets.map(a => `
+        <div class="p-3 rounded-xl bg-alabaster dark:bg-charcoal space-y-2">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-bold text-obsidian dark:text-white">${a.title}</h4>
+            <span class="num text-xs font-bold text-emerald-700 dark:text-emeraldAccent">${fmtMoney(a.amount)}</span>
+          </div>
+          <p class="text-[10px] text-slateMuted">وثيقة تكافل: <span class="num">${a.takaful}</span> • عائد شهري: <span class="num">${fmtMoney(a.monthlyReturn)}</span></p>
+          <div class="flex gap-2">
+            <button onclick="viewCertificate('${a.id}')" class="flex-1 py-1.5 rounded-lg surface-card text-[10px] font-bold">شهادة الملكية والعقد</button>
+            <button onclick="liquidateAssetP2P('${a.id}')" class="flex-1 py-1.5 rounded-lg bg-rose-600/15 text-rose-700 dark:text-rose-300 text-[10px] font-bold">تسييل واسترداد فوري</button>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('p2pMarketList').innerHTML = state.p2pListings.map(item => `
+        <div class="p-3 rounded-xl bg-alabaster dark:bg-charcoal flex items-center justify-between">
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h4 class="text-xs font-bold text-obsidian dark:text-white">${item.title}</h4>
+              <span class="text-[9px] font-num px-1.5 py-0.5 rounded bg-emeraldAccent/15 text-emerald-700 dark:text-emeraldAccent font-bold">خصم ${item.discount}</span>
+            </div>
+            <p class="text-[10px] text-slateMuted mt-0.5">السعر المطلوب: <strong class="num text-obsidian dark:text-white">${fmtMoney(item.askPrice)}</strong> (بدلاً من ${fmtMoney(item.originalVal)})</p>
+          </div>
+          <button onclick="buyP2PListing('${item.id}')" class="px-3 py-1.5 rounded-lg bullion-gradient text-obsidian text-[10px] font-bold">اقتناص الحصة</button>
+        </div>
+      `).join('');
+    }
+
+    function renderShariaZakat(goldVal, opsVal, monthlyYield) {
+      // في الفقه الإسلامي: المعدات المؤجرة (أصول الإجارة) لا تجب الزكاة في أصل قيمتها بل في غلتها (إيجارها) والذهب والسيولة
+      const zakatableBase = goldVal + state.cashBalance + (monthlyYield * 12);
+      const zakatDue = zakatableBase * 0.025;
+      document.getElementById('shariaZakatBreakdown').innerHTML = `
+        <div class="flex justify-between py-1 border-b border-black/5 dark:border-white/5">
+          <span class="text-slateMuted">ذهب عيار 24 والسيولة النقدية (خاضع 2.5%):</span>
+          <span class="num font-bold">${fmtMoney(goldVal + state.cashBalance)}</span>
+        </div>
+        <div class="flex justify-between py-1 border-b border-black/5 dark:border-white/5">
+          <span class="text-slateMuted">أصل المعدات المؤجرة (${fmtMoney(opsVal)}):</span>
+          <span class="text-emerald-700 dark:text-emeraldAccent font-bold">معفى شرعاً (تُزكى الغلة فقط)</span>
+        </div>
+        <div class="flex justify-between pt-1 font-bold text-sm text-obsidian dark:text-white">
+          <span>إجمالي الزكاة السنوية المستحقة:</span>
+          <span class="num text-goldDark dark:text-goldLight">${fmtMoney(zakatDue)}</span>
+        </div>
+      `;
+    }
+
+    // دوال التفاعل وتبديل الشاشات
+    function switchRole(role) {
+      ['investor', 'merchant', 'sharia', 'founder'].forEach(r => {
+        document.getElementById('roleView-' + r).classList.toggle('hidden', r !== role);
+        const btn = document.getElementById('roleBtn-' + r);
+        if (r === role) {
+          btn.className = 'py-1.5 px-1 rounded-lg bg-goldBullion text-obsidian font-bold transition-all text-center truncate';
+        } else {
+          btn.className = 'py-1.5 px-1 rounded-lg text-slate-300 hover:text-white transition-all text-center truncate';
+        }
+      });
+      document.getElementById('investorBottomNav').classList.toggle('hidden', role !== 'investor');
+    }
+
+    function switchInvTab(tab) {
+      ['home', 'gold', 'assets', 'p2p', 'family'].forEach(t => {
+        document.getElementById('invTab-' + t).classList.toggle('hidden', t !== tab);
+        const btn = document.getElementById('navBtn-' + t);
+        if (t === tab) {
+          btn.className = 'flex flex-col items-center gap-1 text-emeraldDeep dark:text-goldBullion font-bold';
+        } else {
+          btn.className = 'flex flex-col items-center gap-1 text-slateMuted font-medium';
+        }
+      });
+    }
+
+    function changeCurrency(curr) {
+      state.currency = curr;
+      renderAll();
+      showToast('تم تحويل عرض العملة إلى ' + curr);
+    }
+
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+    }
+
+    function togglePrivacy() {
+      state.privacy = !state.privacy;
+      renderAll();
+    }
+
+    function toggleAutoGold(checked) {
+      state.autoGold = checked;
+      showToast(checked ? 'تم تفعيل تحويل الأرباح الشهرية تلقائياً لذهب 24K' : 'تم التحويل إلى إضافة الأرباح نقداً');
+    }
+
+    function simulateGoldTick() {
+      const delta = (Math.random() > 0.45 ? 1 : -1) * Math.floor(Math.random() * 25 + 5);
+      state.goldPrice24 = Math.max(3800, state.goldPrice24 + delta);
+      const pct = ((delta / state.goldPrice24) * 100).toFixed(2);
+      const diffEl = document.getElementById('liveGoldDiff');
+      diffEl.textContent = (delta >= 0 ? '+' : '') + pct + '%';
+      diffEl.className = 'num text-[10px] font-semibold ' + (delta >= 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-600');
+      renderAll();
+    }
+
+    // حسابات وتداول الذهب
+    function setGoldTradeMode(mode) {
+      state.goldTradeMode = mode;
+      document.getElementById('goldModeBuy').className = mode === 'buy'
+        ? 'px-3.5 py-1.5 rounded-lg text-xs font-bold bg-obsidian text-white dark:bg-goldBullion dark:text-obsidian transition'
+        : 'px-3.5 py-1.5 rounded-lg text-xs font-bold text-slateMuted transition';
+      document.getElementById('goldModeSell').className = mode === 'sell'
+        ? 'px-3.5 py-1.5 rounded-lg text-xs font-bold bg-obsidian text-white dark:bg-goldBullion dark:text-obsidian transition'
+        : 'px-3.5 py-1.5 rounded-lg text-xs font-bold text-slateMuted transition';
+      document.getElementById('goldActionBtn').textContent = mode === 'buy'
+        ? 'تأكيد شراء وتخصيص الذهب بالخزينة'
+        : 'تأكيد بيع الذهب وإيداع الكاش فوراً';
+      syncGoldCalc('grams');
+    }
+
+    function setQuickGoldGrams(g) {
+      document.getElementById('goldGramsInput').value = g;
+      syncGoldCalc('grams');
+    }
+
+    function syncGoldCalc(source) {
+      const gInput = document.getElementById('goldGramsInput');
+      const aInput = document.getElementById('goldAmountInput');
+      let grams = parseFloat(gInput.value) || 0;
+      let amount = parseFloat(aInput.value) || 0;
+
+      if (source === 'grams') {
+        amount = Math.round(grams * state.goldPrice24);
+        aInput.value = amount;
+      } else {
+        grams = +(amount / state.goldPrice24).toFixed(3);
+        gInput.value = grams;
+      }
+
+      const fee = Math.round(amount * 0.005);
+      const total = state.goldTradeMode === 'buy' ? amount + fee : Math.max(0, amount - fee);
+      document.getElementById('calcGoldUnitPrice').textContent = fmtMoney(state.goldPrice24);
+      document.getElementById('calcGoldFee').textContent = fmtMoney(fee);
+      document.getElementById('calcGoldTotal').textContent = fmtMoney(total);
+    }
+
+    function executeGoldTrade() {
+      const grams = parseFloat(document.getElementById('goldGramsInput').value) || 0;
+      if (grams <= 0) return showToast('يرجى إدخال وزن صحيح');
+      const baseAmount = Math.round(grams * state.goldPrice24);
+      const fee = Math.round(baseAmount * 0.005);
+
+      if (state.goldTradeMode === 'buy') {
+        const totalCost = baseAmount + fee;
+        if (state.cashBalance < totalCost) return showToast('السيولة النقدية غير كافية، يرجى شحن المحفظة أولاً');
+        state.cashBalance -= totalCost;
+        state.goldGrams += grams;
+        state.goldBars[2].weight += grams;
+        state.ledger.unshift({ title: `شراء وتخصيص ${grams.toFixed(2)} جم ذهب عيار 24`, date: 'الآن', amount: `-${fmtMoney(totalCost)}`, type: 'out' });
+        showToast(`تم تخصيص ${grams.toFixed(2)} جرام ذهب عيار 24 في خزينتك`);
+      } else {
+        if (state.goldGrams < grams) return showToast('رصيد الذهب في خزينتك غير كافٍ');
+        const netReceive = baseAmount - fee;
+        state.goldGrams -= grams;
+        state.cashBalance += netReceive;
+        state.ledger.unshift({ title: `تسييل وبيع ${grams.toFixed(2)} جم ذهب عيار 24`, date: 'الآن', amount: `+${fmtMoney(netReceive)}`, type: 'in' });
+        showToast(`تم بيع ${grams.toFixed(2)} جم وإضافة ${fmtMoney(netReceive)} لسيولتك`);
+      }
+      renderAll();
+    }
+
+    function requestPhysicalGoldDelivery() {
+      openModal('طلب استلام سبيكة عينية مدموغة', `
+        <p class="text-slateMuted">يمكنك استلام سبائكك المخصصة (ابتداءً من 5 جرام عيار 24) بشركة شحن مؤمنة لباب منزلك أو فرع الخزينة المعتمد.</p>
+        <div class="p-3 rounded-xl bg-alabaster dark:bg-obsidian space-y-1">
+          <div class="flex justify-between"><span>الرصيد القابل للتسليم العيني:</span><strong class="num">${state.goldGrams.toFixed(2)} جم</strong></div>
+          <div class="flex justify-between"><span>رسوم الشحن المؤمن والدمغة:</span><strong class="num">180 ج.م</strong></div>
+        </div>
+        <button onclick="closeModal(); showToast('تم تسجيل طلب التسليم العيني وسيتم التواصل لتحديد الموعد');" class="w-full py-2.5 rounded-xl bg-emeraldDeep text-white font-bold">تأكيد طلب الاستلام العيني</button>
+      `);
+    }
+
+    // دورة تحصيل أرباح الشهر
+    function simulateMonthCycle() {
+      const grossYield = state.ownedAssets.reduce((s, a) => s + a.monthlyReturn, 0);
+      const waqfCut = Math.round(grossYield * (state.waqfPercent / 100));
+      const netYield = grossYield - waqfCut;
+
+      if (state.autoGold) {
+        const boughtGrams = +(netYield / state.goldPrice24).toFixed(3);
+        state.goldGrams += boughtGrams;
+        state.goldBars[2].weight += boughtGrams;
+        state.ledger.unshift({ title: `تحويل عائد الشهر تلقائياً إلى ${boughtGrams} جم ذهب 24K`, date: 'الآن', amount: `+${boughtGrams} جم`, type: 'in' });
+        showToast(`تم تحصيل العائد وتحويله تلقائياً إلى ${boughtGrams} جم ذهب 24K`);
+      } else {
+        state.cashBalance += netYield;
+        state.ledger.unshift({ title: `صرف صافي عوائد الإجارة والمرابحة الشهرية`, date: 'الآن', amount: `+${fmtMoney(netYield)}`, type: 'in' });
+        showToast(`تم إيداع صافي أرباح الشهر (${fmtMoney(netYield)}) في محفظتك`);
+      }
+      renderAll();
+    }
+
+    // نافذة التوقيع الإلكتروني والاستثمار في الفرص
+    function openInvestContractModal(oppId) {
+      const opp = state.opportunities.find(o => o.id === oppId);
+      if (!opp) return;
+      openModal('عقد استثمار وتوقيع إلكتروني موثق', `
+        <div class="p-3 rounded-xl bg-alabaster dark:bg-obsidian space-y-1">
+          <h4 class="font-bold text-obsidian dark:text-white">${opp.title}</h4>
+          <p class="text-[11px] text-slateMuted">${opp.typeLabel} • العائد السنوي المتوقع: <strong class="num text-emerald-600">${opp.roi}%</strong></p>
+        </div>
+        <div>
+          <label class="text-[11px] text-slateMuted block mb-1">المبلغ المراد استثماره (الحد الأدنى ${opp.minAmount} ج.م)</label>
+          <input type="number" id="investModalAmount" value="${opp.minAmount * 2}" min="${opp.minAmount}" step="500" class="w-full px-3 py-2 rounded-xl bg-alabaster dark:bg-obsidian num font-bold text-sm border border-black/10 dark:border-white/10">
+        </div>
+        <div>
+          <label class="text-[11px] text-slateMuted block mb-1">اختر هيكل أجر الإدارة الشرعي:</label>
+          <select id="investFeeModel" class="w-full px-3 py-2 rounded-xl bg-alabaster dark:bg-obsidian text-xs font-semibold border border-black/10 dark:border-white/10">
+            <option value="mudaraba">مضاربة بـ 0% رسوم دخول (85% من الربح لك و15% للمدير)</option>
+            <option value="wakala">وكالة بأجر ثابت 1.5% مرة واحدة (و100% من العائد لك)</option>
+          </select>
+        </div>
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-[11px] text-slateMuted">التوقيع الإلكتروني الحي على العقد:</span>
+            <button onclick="clearSigCanvas()" class="text-[10px] text-rose-600">مسح التوقيع</button>
+          </div>
+          <canvas id="sigCanvas" width="340" height="90" class="w-full h-24 rounded-xl bg-ivory dark:bg-obsidian border border-dashed border-goldBullion"></canvas>
+        </div>
+        <button onclick="confirmOpportunityInvest('${opp.id}')" class="w-full py-2.5 rounded-xl bullion-gradient text-obsidian font-bold text-xs">
+          اعتماد العقد وتنفيذ الاستثمار فوراً
+        </button>
+      `);
+      setTimeout(initSigCanvas, 60);
+    }
+
+    let sigDrawn = false;
+    function initSigCanvas() {
+      const canvas = document.getElementById('sigCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.strokeStyle = '#C5A059';
+      ctx.lineWidth = 2.2;
+      ctx.lineCap = 'round';
+      let drawing = false;
+      sigDrawn = false;
+
+      const getPos = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top };
+      };
+
+      const start = (e) => { drawing = true; sigDrawn = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
+      const move = (e) => { if (!drawing) return; e.preventDefault(); const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
+      const end = () => { drawing = false; };
+
+      canvas.onmousedown = start; canvas.onmousemove = move; window.onmouseup = end;
+      canvas.ontouchstart = start; canvas.ontouchmove = move; canvas.ontouchend = end;
+    }
+
+    function clearSigCanvas() {
+      const canvas = document.getElementById('sigCanvas');
+      if (!canvas) return;
+      canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+      sigDrawn = false;
+    }
+
+    function confirmOpportunityInvest(oppId) {
+      const opp = state.opportunities.find(o => o.id === oppId);
+      const amount = parseFloat(document.getElementById('investModalAmount').value) || 0;
+      if (amount < opp.minAmount) return showToast('المبلغ أقل من الحد الأدنى للفرصة');
+      if (amount > state.cashBalance) return showToast('السيولة النقدية بالمحفظة غير كافية');
+
+      state.cashBalance -= amount;
+      opp.funded += amount;
+      const monthly = Math.round((amount * (opp.roi / 100)) / 12);
+      state.ownedAssets.unshift({
+        id: 'AST-' + Math.floor(Math.random() * 900 + 200),
+        title: opp.title,
+        type: opp.typeLabel,
+        amount: amount,
+        monthlyReturn: monthly,
+        roi: opp.roi,
+        serial: 'OSL-' + Math.floor(Math.random() * 8999 + 1000),
+        takaful: 'TAK-' + Math.floor(Math.random() * 89999 + 10000),
+        posToday: 'تم التفعيل والربط بنقاط البيع اليوم',
+        gps: 'موثق ومؤمن ميدانياً'
+      });
+      state.ledger.unshift({ title: `استثمار موثق في: ${opp.title}`, date: 'الآن', amount: `-${fmtMoney(amount)}`, type: 'out' });
+      closeModal();
+      renderAll();
+      showToast('تم توثيق العقد وإضافة الأصل لمحفظتك بنجاح');
+    }
+
+    // سلة التحوط الثلاثي للمغتربين
+    function executeAutoHedgeBasket() {
+      const amt = parseFloat(document.getElementById('hedgeAmountInput').value) || 0;
+      if (amt < 3000) return showToast('الحد الأدنى لسلة التحوط الثلاثي هو 3,000 ج.م');
+      if (amt > state.cashBalance) return showToast('السيولة الجاهزة غير كافية لتفعيل السلة');
+
+      const goldAlloc = amt * 0.40;
+      const opsAlloc = amt * 0.60;
+      const boughtGrams = +(goldAlloc / state.goldPrice24).toFixed(3);
+
+      state.cashBalance -= amt;
+      state.goldGrams += boughtGrams;
+      state.goldBars[2].weight += boughtGrams;
+      state.ownedAssets.unshift({
+        id: 'HEDGE-' + Math.floor(Math.random() * 900 + 100),
+        title: 'حافظة إجارة ومرابحة مجمعة (سلة التحوط الثلاثي)',
+        type: 'إجارة + مرابحة مؤمنة',
+        amount: opsAlloc,
+        monthlyReturn: Math.round((opsAlloc * 0.225) / 12),
+        roi: 22.5,
+        serial: 'HDG-2026-99',
+        takaful: 'TAK-HEDGE-88',
+        posToday: 'توزيع آلي نشط على 4 تجار',
+        gps: 'محفظة متنوعة المؤشرات'
+      });
+      state.ledger.unshift({ title: `تفعيل سلة التحوط الثلاثي (${boughtGrams} جم ذهب + أصول)`, date: 'الآن', amount: `-${fmtMoney(amt)}`, type: 'out' });
+      renderAll();
+      showToast('تم توزيع المبلغ بنجاح بين الذهب عيار 24 والأصول المدرة للدخل');
+    }
+
+    // الأدوات الحصرية (المقايضة، القرض الحسن، درع الأمان، محاكي الأزمات، الدراسة لصديق)
+    function openSwapModal() {
+      openModal('مقايضة الأصول الفورية (0% عمولة وساطة)', `
+        <p class="text-slateMuted">بدّل جرامات الذهب مباشرة بحصة في معدة إجارة مدرة للدخل الشهري بدون دفع رسوم بيع وشراء مزدوجة.</p>
+        <div>
+          <label class="text-[11px] text-slateMuted block mb-1">عدد جرامات الذهب المراد مقايضتها بعقد إجارة:</label>
+          <input type="number" id="swapGramsInput" value="2.0" step="0.5" max="${state.goldGrams}" class="w-full px-3 py-2 rounded-xl bg-alabaster dark:bg-obsidian num font-bold text-sm">
+        </div>
+        <button onclick="executeSwapGoldToIjara()" class="w-full py-2.5 rounded-xl bg-emeraldDeep text-white font-bold">تنفيذ المقايضة الشرعية فوراً</button>
+      `);
+    }
+
+    function executeSwapGoldToIjara() {
+      const g = parseFloat(document.getElementById('swapGramsInput').value) || 0;
+      if (g <= 0 || g > state.goldGrams) return showToast('رصيد الذهب غير كافٍ');
+      const eqVal = Math.round(g * state.goldPrice24);
+      state.goldGrams -= g;
+      state.ownedAssets.unshift({
+        id: 'SWP-' + Math.floor(Math.random() * 900 + 100),
+        title: 'حصة إجارة معدات طبية (مقايضة ذهب مباشرة)',
+        type: 'إجارة منتهية بالتمليك',
+        amount: eqVal,
+        monthlyReturn: Math.round((eqVal * 0.23) / 12),
+        roi: 23.0,
+        serial: 'SWP-8821',
+        takaful: 'TAK-88210',
+        posToday: 'مقايضة فورية بـ 0% عمولة',
+        gps: 'القاهرة الكبرى'
+      });
+      state.ledger.unshift({ title: `مقايضة ${g} جم ذهب بحصة إجارة مدرة للدخل`, date: 'الآن', amount: fmtMoney(eqVal), type: 'in' });
+      closeModal();
+      renderAll();
+      showToast('تمت المقايضة بنجاح بـ 0% رسوم وساطة');
+    }
+
+    function openQardModal() {
+      const maxLoan = Math.round(state.goldGrams * state.goldPrice24 * 0.65);
+      openModal('سيولة طوارئ فورية بضمان الذهب (قرض حسن 0% ربا)', `
+        <p class="text-slateMuted">احصل على سيولة نقدية فورية من صندوق التكافل بضمان سبائكك دون بيعها، وتُسدد تلقائياً من عوائدك الشهرية بدون أي فوائد ربوية.</p>
+        <div class="p-3 rounded-xl bg-alabaster dark:bg-obsidian space-y-1">
+          <div class="flex justify-between"><span>قيمة ذهبك المرهون كضمان:</span><strong class="num">${fmtMoney(state.goldGrams * state.goldPrice24)}</strong></div>
+          <div class="flex justify-between"><span>الحد الأقصى للسيولة الفورية (65%):</span><strong class="num text-emerald-600">${fmtMoney(maxLoan)}</strong></div>
+        </div>
+        <input type="number" id="qardAmountInput" value="10000" max="${maxLoan}" class="w-full px-3 py-2 rounded-xl bg-alabaster dark:bg-obsidian num font-bold text-sm">
+        <button onclick="executeQardHasan()" class="w-full py-2.5 rounded-xl bullion-gradient text-obsidian font-bold">صرف السيولة الفورية للمحفظة (0% فوائد)</button>
+      `);
+    }
+
+    function executeQardHasan() {
+      const amt = parseFloat(document.getElementById('qardAmountInput').value) || 0;
+      if (amt <= 0) return;
+      state.cashBalance += amt;
+      state.ledger.unshift({ title: 'استلام سيولة طوارئ (قرض حسن بضمان الذهب 0% فوائد)', date: 'الآن', amount: `+${fmtMoney(amt)}`, type: 'in' });
+      closeModal();
+      renderAll();
+      showToast(`تم إيداع ${fmtMoney(amt)} في سيولتك الجاهزة دون بيع ذهبك`);
+    }
+
+    function openSafetyShieldModal() {
+      openModal('درع الأمان المالي ("لا تغامر بمبلغ تحتاجه")', `
+        <p class="text-slateMuted">قاعدتنا الأساسية: لا تستثمر أموال معيشتك أو طوارئ أسرتك. احسب الفائض الآمن للاستثمار:</p>
+        <div class="space-y-2">
+          <div>
+            <label class="text-[11px] text-slateMuted">إجمالي المبلغ المتاح معك الآن (ج.م):</label>
+            <input type="number" id="shieldTotalCash" value="100000" oninput="calcShield()" class="w-full px-3 py-1.5 rounded-xl bg-alabaster dark:bg-obsidian num font-bold">
+          </div>
+          <div>
+            <label class="text-[11px] text-slateMuted">مصاريف بيتك الشهرية الأساسية (ج.م):</label>
+            <input type="number" id="shieldMonthlyExp" value="12000" oninput="calcShield()" class="w-full px-3 py-1.5 rounded-xl bg-alabaster dark:bg-obsidian num font-bold">
+          </div>
+          <div id="shieldResultBox" class="p-3 rounded-xl bg-alabaster dark:bg-obsidian space-y-1"></div>
+        </div>
+      `);
+      calcShield();
+    }
+
+    function calcShield() {
+      const total = parseFloat(document.getElementById('shieldTotalCash')?.value) || 0;
+      const exp = parseFloat(document.getElementById('shieldMonthlyExp')?.value) || 0;
+      const emergencyReserve = exp * 3;
+      const safeToInvest = Math.max(0, total - emergencyReserve);
+      const box = document.getElementById('shieldResultBox');
+      if (box) {
+        box.innerHTML = `
+          <div class="flex justify-between"><span>احتياطي طوارئ 3 شهور (يُترك نقداً):</span><strong class="num text-amber-600">${fmtMoney(emergencyReserve)}</strong></div>
+          <div class="flex justify-between pt-1 border-t border-black/10"><span>الفائض الآمن للاستثمار الحلال:</span><strong class="num text-emerald-600">${fmtMoney(safeToInvest)}</strong></div>
+        `;
+      }
+    }
+
+    function openStressTestModal() {
+      openModal('محاكي الأزمات والضمانات وحماية رأس المال', `
+        <div class="space-y-2.5 text-[11px]">
+          <div class="p-3 rounded-xl bg-alabaster dark:bg-obsidian">
+            <strong class="text-obsidian dark:text-white block">السيناريو 1: تعطل الماكينة أو الجهاز الطبي</strong>
+            <span class="text-slateMuted">جميع المعدات مغطاة بوثيقة تأمين تكافلي شاملة للصيانة والاستبدال دون خصم جنيه واحد من أصل المستثمر.</span>
+          </div>
+          <div class="p-3 rounded-xl bg-alabaster dark:bg-obsidian">
+            <strong class="text-obsidian dark:text-white block">السيناريو 2: تأخر التاجر في السداد</strong>
+            <span class="text-slateMuted">يتم التحصيل أصلاً من المنبع عبر ماكينة الكاشير (POS Split)، وفي حال إغلاق النشاط تُنقل المعدة المملوكة لنا لتاجر آخر بقائمة الانتظار خلال 72 ساعة.</span>
+          </div>
+          <div class="p-3 rounded-xl bg-alabaster dark:bg-obsidian">
+            <strong class="text-obsidian dark:text-white block">السيناريو 3: احتياج المستثمر لفلوسه فجأة</strong>
+            <span class="text-slateMuted">يمكنه تسييل حصته فوراً في سوق التخارج الثانوي (P2P) أو سحب قرض حسن بضمان الذهب في نفس اليوم.</span>
+          </div>
+        </div>
+      `);
+    }
+
+    function openFriendProposalModal() {
+      openModal('إصدار بطاقة دراسة استثمارية لصديق (بدون التزام)', `
+        <p class="text-slateMuted">أدخل اسم صديقك والمبلغ الراكن معه لنسخ دراسة واضحة ومفصلة وإرسالها له على واتساب ليقرر بنفسه بدون أي التزام.</p>
+        <input type="text" id="friendNameInput" placeholder="اسم صديقك (مثال: أحمد)" value="أحمد" class="w-full px-3 py-2 rounded-xl bg-alabaster dark:bg-obsidian text-xs font-bold">
+        <input type="number" id="friendAmtInput" value="50000" step="5000" class="w-full px-3 py-2 rounded-xl bg-alabaster dark:bg-obsidian num text-xs font-bold">
+        <button onclick="copyFriendWhatsAppProposal()" class="w-full py-2.5 rounded-xl bg-emeraldDeep text-white font-bold">نسخ الدراسة التفصيلية وإرسالها واتساب</button>
+      `);
+    }
+
+    function copyFriendWhatsAppProposal() {
+      const name = document.getElementById('friendNameInput').value || 'صاحبي';
+      const amt = parseFloat(document.getElementById('friendAmtInput').value) || 50000;
+      const gGrams = ((amt * 0.4) / state.goldPrice24).toFixed(2);
+      const monthly = Math.round(((amt * 0.6) * 0.23) / 12);
+      const text = `بص يا ${name}، دي دراسة مبدئية واضحة من تطبيق (أصول) لمبلغ ${amt.toLocaleString()} ج.م بدون أي التزام عليك:\n` +
+        `• 40% حفظ قيمة: شراء ${gGrams} جرام ذهب عيار 24 باسمك في خزينة معتمدة.\n` +
+        `• 60% تشغيل: حصة في معدات مؤجرة وطلبيات مرابحة بعائد شهري تقديري ~${monthly.toLocaleString()} ج.م.\n` +
+        `• الأمان والاسترداد: كل معدة مؤمنة تكافلياً وتقدر تسيل حصتك أو تستلم ذهبك في أي وقت.`;
+      navigator.clipboard?.writeText(text);
+      closeModal();
+      showToast('تم نسخ الدراسة باسم ' + name + ' جاهزة للإرسال على واتساب');
+    }
+
+    function openAdvisorModal() {
+      openModal('المستشار الاستثماري الذكي ("ادرسلي أفضل طريقة")', `
+        <p class="text-slateMuted">أدخل المبلغ الراكن لنقترح عليك أفضل توزيع شرعي يجمع بين حفظ القيمة بالذهب والعائد الشهري:</p>
+        <input type="number" id="advAmount" value="30000" step="5000" class="w-full px-3 py-2 rounded-xl bg-alabaster dark:bg-obsidian num font-bold text-sm">
+        <button onclick="runAdvisorExecution()" class="w-full py-2.5 rounded-xl bullion-gradient text-obsidian font-bold">اعتماد التوزيع المقترح وتنفيذه</button>
+      `);
+    }
+
+    function runAdvisorExecution() {
+      const amt = parseFloat(document.getElementById('advAmount').value) || 0;
+      document.getElementById('hedgeAmountInput').value = amt;
+      closeModal();
+      executeAutoHedgeBasket();
+    }
+
+    function openCashModal(mode) {
+      openModal(mode === 'deposit' ? 'إيداع وشحن سيولة بالمحفظة' : 'استرداد وسحب الأرباح ورأس المال', `
+        <input type="number" id="cashModalAmt" value="10000" step="1000" class="w-full px-3 py-2 rounded-xl bg-alabaster dark:bg-obsidian num font-bold text-sm">
+        <button onclick="executeCashAction('${mode}')" class="w-full py-2.5 rounded-xl bg-emeraldDeep text-white font-bold">
+          ${mode === 'deposit' ? 'تأكيد الإيداع الفوري' : 'تأكيد التحويل للحساب البنكي'}
+        </button>
+      `);
+    }
+
+    function executeCashAction(mode) {
+      const amt = parseFloat(document.getElementById('cashModalAmt').value) || 0;
+      if (amt <= 0) return;
+      if (mode === 'deposit') {
+        state.cashBalance += amt;
+        state.ledger.unshift({ title: 'إيداع سيولة نقدية بالمحفظة', date: 'الآن', amount: `+${fmtMoney(amt)}`, type: 'in' });
+        showToast(`تم إيداع ${fmtMoney(amt)} بنجاح`);
+      } else {
+        if (amt > state.cashBalance) return showToast('الرصيد النقدي المتاح أقل من المبلغ المطلوب');
+        state.cashBalance -= amt;
+        state.ledger.unshift({ title: 'سحب واسترداد نقدي للحساب البنكي', date: 'الآن', amount: `-${fmtMoney(amt)}`, type: 'out' });
+        showToast(`تم تحويل ${fmtMoney(amt)} لحسابك البنكي`);
+      }
+      closeModal();
+      renderAll();
+    }
+
+    function filterOpportunities(cat) {
+      state.oppFilter = cat;
+      ['all', 'ijara', 'murabaha', 'green'].forEach(c => {
+        const btn = document.getElementById('oppFilter-' + c);
+        btn.className = c === cat
+          ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-obsidian text-white dark:bg-goldBullion dark:text-obsidian shrink-0'
+          : 'px-3 py-1.5 rounded-lg text-xs font-semibold surface-card text-slateMuted shrink-0';
+      });
+      renderOpportunities();
+    }
+
+    function joinRosca(id) {
+      const r = state.roscaList.find(x => x.id === id);
+      if (!r || r.joined) return;
+      const cost = Math.round(r.monthlyGrams * state.goldPrice24);
+      if (state.cashBalance < cost) return showToast('السيولة غير كافية لسداد أول قسط ذهبي');
+      state.cashBalance -= cost;
+      r.joined = true;
+      state.ledger.unshift({ title: `سداد القسط الأول في ${r.title}`, date: 'الآن', amount: `-${fmtMoney(cost)}`, type: 'out' });
+      renderAll();
+      showToast('تم حجز دورك في جمعية الذهب بنجاح');
+    }
+
+    function joinSyndicate(id) {
+      const s = state.syndicates.find(x => x.id === id);
+      if (!s) return;
+      if (state.cashBalance < s.minShare) return showToast('السيولة غير كافية للانضمام للغرفة');
+      state.cashBalance -= s.minShare;
+      s.members = '8 من 10 أصدقاء (أنت مشترك)';
+      state.ledger.unshift({ title: `حجز سهم تشاركي في: ${s.title}`, date: 'الآن', amount: `-${fmtMoney(s.minShare)}`, type: 'out' });
+      renderAll();
+      showToast('تم انضمامك لغرفة استثمار الأصدقاء');
+    }
+
+    function viewCertificate(assetId) {
+      const a = state.ownedAssets.find(x => x.id === assetId);
+      if (!a) return;
+      openModal('شهادة ملكية وعقد موثق', `
+        <div class="p-4 rounded-xl bg-ivory dark:bg-obsidian border-2 border-goldBullion/50 space-y-2">
+          <div class="flex justify-between items-center border-b border-black/10 pb-2">
+            <span class="font-bold text-obsidian dark:text-white">وثيقة تملك أصل تشغيلي</span>
+            <span class="num text-[10px] px-2 py-0.5 rounded bg-goldBullion text-obsidian font-bold">${a.id}</span>
+          </div>
+          <p class="text-xs font-bold">${a.title}</p>
+          <div class="text-[11px] space-y-1 text-slateMuted">
+            <div>المالك الموكل: <strong class="text-obsidian dark:text-white">محمود عبدالقوي</strong></div>
+            <div>قيمة الحصة المدفوعة: <strong class="num text-obsidian dark:text-white">${fmtMoney(a.amount)}</strong></div>
+            <div>الرقم التسلسلي للمعدة: <strong class="num text-obsidian dark:text-white">${a.serial}</strong></div>
+            <div>وثيقة التأمين التكافلي: <strong class="num text-emerald-600">${a.takaful}</strong></div>
+          </div>
+        </div>
+      `);
+    }
+
+    function liquidateAssetP2P(assetId) {
+      const idx = state.ownedAssets.findIndex(x => x.id === assetId);
+      if (idx === -1) return;
+      const a = state.ownedAssets[idx];
+      state.ownedAssets.splice(idx, 1);
+      state.cashBalance += a.amount;
+      state.ledger.unshift({ title: `تسييل واسترداد أصل: ${a.title}`, date: 'الآن', amount: `+${fmtMoney(a.amount)}`, type: 'in' });
+      renderAll();
+      showToast(`تم تسييل الأصل وإيداع ${fmtMoney(a.amount)} في سيولتك الجاهزة`);
+    }
+
+    function buyP2PListing(id) {
+      const idx = state.p2pListings.findIndex(x => x.id === id);
+      if (idx === -1) return;
+      const item = state.p2pListings[idx];
+      if (state.cashBalance < item.askPrice) return showToast('السيولة غير كافية لاقتناص هذه الحصة');
+      state.cashBalance -= item.askPrice;
+      state.p2pListings.splice(idx, 1);
+      state.ownedAssets.unshift({
+        id: 'AST-P2P',
+        title: item.title,
+        type: 'إجارة مستحوذ عليها من السوق الثانوي',
+        amount: item.originalVal,
+        monthlyReturn: item.monthlyYield,
+        roi: 23.4,
+        serial: 'P2P-9940',
+        takaful: 'TAK-88120',
+        posToday: 'تدر عائداً من اليوم الأول',
+        gps: 'موثق بالخزينة'
+      });
+      state.ledger.unshift({ title: `شراء حصة P2P بخصم ${item.discount}: ${item.title}`, date: 'الآن', amount: `-${fmtMoney(item.askPrice)}`, type: 'out' });
+      renderAll();
+      showToast('تم اقتناص الحصة بخصم فوري وإضافتها لأصولك');
+    }
+
+    function payFamilyBill(title, cost, cashbackRate) {
+      if (state.cashBalance < cost) return showToast('يرجى شحن السيولة أو صرف عائد الشهر أولاً');
+      state.cashBalance -= cost;
+      const goldCashbackValue = cost * cashbackRate;
+      const bonusGrams = +(goldCashbackValue / state.goldPrice24).toFixed(3);
+      state.goldGrams += bonusGrams;
+      state.goldBars[2].weight += bonusGrams;
+      state.ledger.unshift({ title: `سداد فاتورة أسرة (${title}) + كاش باك ${bonusGrams} جم ذهب`, date: 'الآن', amount: `-${fmtMoney(cost)}`, type: 'out' });
+      renderAll();
+      showToast(`تم سداد الفاتورة وإضافة ${bonusGrams} جم ذهب عيار 24 مجاناً لخزينتك`);
+    }
+
+    function updateWaqfPercent(val) {
+      state.waqfPercent = parseFloat(val) || 0;
+      showToast(`تم ضبط سهم البركة على ${state.waqfPercent}% من صافي الربح الشهري فقط`);
+    }
+
+    function saveNomineeSettings() {
+      showToast('تم حفظ وتوثيق بيانات الوكيل العائلي بنجاح');
+    }
+
+    // بوابة التجار ولوحة المؤسس
+    function submitMerchantRequest() {
+      const title = document.getElementById('merchTitleInput').value.trim() || 'معدة طبية / تجارية جديدة';
+      const cat = document.getElementById('merchTypeInput').value;
+      const cost = parseFloat(document.getElementById('merchCostInput').value) || 80000;
+      const roi = parseFloat(document.getElementById('merchRoiInput').value) || 23;
+      const min = parseFloat(document.getElementById('merchMinInput').value) || 2500;
+
+      state.opportunities.unshift({
+        id: 'OPP-' + Math.floor(Math.random() * 900 + 100),
+        category: cat,
+        title: title,
+        typeLabel: cat === 'ijara' ? 'إجارة منتهية بالتمليك' : 'مرابحة بضاعة سريعة',
+        target: cost,
+        funded: 0,
+        minAmount: min,
+        roi: roi,
+        takaful: 'وثيقة تأمين تكافلي معتمدة فور التوريد',
+        collateral: 'استقطاع آلي يومي من ماكينة POS + رهن الأصل'
+      });
+      renderAll();
+      switchRole('investor');
+      switchInvTab('assets');
+      showToast('تم اعتماد طلب التاجر وإدراجه فوراً في سوق فرص المستثمرين');
+    }
+
+    function calcFounderRevenue() {
+      const users = parseFloat(document.getElementById('founderUsersInput')?.value) || 50;
+      const avg = parseFloat(document.getElementById('founderAvgPortfolio')?.value) || 120000;
+      const totalAUM = users * avg;
+      const annualWakala = totalAUM * 0.015;
+      const annualMudarabaShare = (totalAUM * 0.22) * 0.15;
+      const monthlyFounderNet = Math.round((annualWakala + annualMudarabaShare) / 12);
+
+      const box = document.getElementById('founderRevenueBox');
+      if (box) {
+        box.innerHTML = `
+          <div class="flex justify-between"><span>إجمالي الأصول المدارة (AUM):</span><strong class="num">${fmtMoney(totalAUM)}</strong></div>
+          <div class="flex justify-between"><span>أجر الوكالة السنوي (1.5%):</span><strong class="num">${fmtMoney(annualWakala)}</strong></div>
+          <div class="flex justify-between"><span>حصة المضاربة من الأرباح (15%):</span><strong class="num">${fmtMoney(annualMudarabaShare)}</strong></div>
+          <div class="flex justify-between pt-1.5 border-t border-black/10 dark:border-white/10 font-bold text-emerald-700 dark:text-emeraldAccent text-xs">
+            <span>صافي دخل المؤسس الشهري المتوقع:</span>
+            <span class="num">${fmtMoney(monthlyFounderNet)} / شهر</span>
+          </div>
+        `;
+      }
+    }
+
+    function updateGoldPriceFromAdmin() {
+      const newP = parseFloat(document.getElementById('adminGoldPriceInput').value) || 4120;
+      state.goldPrice24 = newP;
+      renderAll();
+      showToast('تم تحديث سعر جرام الذهب عيار 24 في كافة شاشات التطبيق');
+    }
+
+    function copyMonthlyFounderReport() {
+      const report = `📊 تقرير الشفافية الشهري الموثق — منصة أصول (Osool)\n` +
+        `• سعر جرام الذهب عيار 24 بالخزينة: ${state.goldPrice24} ج.م\n` +
+        `• نسبة تحصيل إيجارات المعدات من نقاط البيع (POS): 100%\n` +
+        `• جميع السبائك والمعدات مطابقة للجرد الميداني ومغطاة بالتأمين التكافلي.`;
+      navigator.clipboard?.writeText(report);
+      showToast('تم نسخ تقرير الشفافية الشهري لإرساله للمستثمرين على واتساب');
+    }
+
+    // التشغيل الأولي
+    window.addEventListener('DOMContentLoaded', renderAll);
+  </script>
+</body>
+</html>
