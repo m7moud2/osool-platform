@@ -27,4 +27,39 @@ http://localhost:8000
 ## ملاحظات التشغيل
 - المشروع يعمل كـ frontend demo/prototype جاهز للتوسعة.
 - موضوع الدفع الفعلي يظل خارج التطبيق ويتم التحقق منه من خلال لوحة المدير.
-- البيانات محلية داخل المتصفح (localStorage) في النسخة الحالية.
+- البيانات محلية داخل المتصفح (localStorage) في النسخة الحالية، مع هيكلة حسابية منفصلة لكل مستخدم للحفاظ على عزل البيانات قبل الانتقال إلى Firebase.
+
+## جاهزية Firebase وواجهة الإنتاج
+- تم تجهيز ملف `firebase-config.js` كـ placeholder جاهز لربط Firebase Auth و Firestore و Storage.
+- تم إنشاء ملفات Firebase التشغيلية التالية:
+  - `firebase.json`
+  - `firestore.rules`
+  - `firestore.indexes.json`
+  - `storage.rules`
+- كل مستخدم يحصل على `id` مستقل، وتُخزن بيانات حسابه ضمن مساحة محلية منفصلة لتقليل النزاعات قبل الترحيل إلى قاعدة بيانات حقيقية.
+- يمكن توسيع النموذج الحالي إلى:
+  - `users` (بيانات الحسابات)
+  - `wallet_requests` (طلبات الشحن والسحب)
+  - `transactions` (سجل العمليات)
+  - `admin_actions` (سجل الموافقات والإلغاء)
+  - `proof_images` (صور إثبات التحويل)
+
+## إعداد Firebase الفعلي
+1. أنشئ مشروع Firebase جديداً من وحدة التحكم.
+2. فعّل Authentication، Firestore، Storage.
+3. استبدل القيم في `firebase-config.js` بالقيم الفعلية من مشروعك.
+4. شغّل Firebase CLI:
+   ```bash
+   npm install -g firebase-tools
+   firebase login
+   firebase init
+   firebase deploy
+   ```
+5. تأكد من تعيين `admin` داخل custom claims أو ربط حساب المدير بشكل مناسب عند التفعيل النهائي.
+
+## خطة التطوير القادمة
+1. ربط Firebase Authentication مع تسجيل مستخدمين حقيقيين.
+2. نقل storage من localStorage إلى Firestore + Storage.
+3. إضافة صلاحيات admin/user مع قواعد الأمان.
+4. ربط لوحة الإدارة بالدفع الخارجي وتوثيق المعاملات.
+5. إطلاق النسخة التجريبية مجاناً قبل توسيع النموذج التجاري.

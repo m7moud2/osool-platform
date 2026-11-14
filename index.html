@@ -4,6 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>أصول | Osool — منصة الثروة والأصول الحقيقية الموثقة</title>
+  <script src="./firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script src="./firebase-manager.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -802,6 +808,8 @@
           <p class="text-[11px] text-slateMuted">أنشئ حساب مستثمر جديد لتخصيص محفظتك وحساب عوائدك بدقة</p>
         </div>
 
+        <div id="savedAccountsList" class="space-y-2 hidden"></div>
+
         <form onsubmit="handleAuthSubmit(event)" class="space-y-3">
           <div>
             <label class="text-[11px] font-bold text-obsidian dark:text-slate-200 block mb-1">الاسم الكامل للمستثمر *</label>
@@ -870,6 +878,194 @@
 
   <script>
     // الحالة المركزية للتطبيق (State Management)
+    const STORAGE_KEYS = {
+      currentUser: 'osool_current_user',
+      userRegistry: 'osool_users_registry',
+      userProfilePrefix: 'osool_profile_'
+    };
+
+    function generateUserId(prefix = 'USR') {
+      return `${prefix}-${Math.random().toString(36).slice(2, 9)}-${Date.now().toString(36)}`;
+    }
+
+    function getUserProfileKey(userId) {
+      return `${STORAGE_KEYS.userProfilePrefix}${userId}`;
+    }
+
+    function readUserRegistry() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEYS.userRegistry) || '[]');
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function writeUserRegistry(list) {
+      localStorage.setItem(STORAGE_KEYS.userRegistry, JSON.stringify(list));
+    }
+
+    function registerUser(user) {
+      const registry = readUserRegistry();
+      const existingIndex = registry.findIndex(item => item.id === user.id);
+      if (existingIndex >= 0) {
+        registry[existingIndex] = { ...registry[existingIndex], ...user };
+      } else {
+        registry.push({ id: user.id, name: user.name, phone: user.phone, role: user.role || 'user', currency: user.currency || 'EGP' });
+      }
+      writeUserRegistry(registry);
+    }
+
+    function getDefaultAccountState() {
+      return JSON.parse(JSON.stringify({
+        cashBalance: 50000,
+        goldGrams: 10,
+        goldPrice24: 4120,
+        goldBars: [
+          { id: 'BTC-992841-EG', weight: 5.0, vault: 'خزينة Brinks المعتمدة - القاهرة', purity: '999.9 (24K)' },
+          { id: 'BTC-992910-EG', weight: 5.0, vault: 'خزينة Brinks المعتمدة - القاهرة', purity: '999.9 (24K)' }
+        ],
+        ownedAssets: [
+          {
+            id: 'AST-101',
+            title: 'ماكينة قهوة إيطالي La Marzocco - كافيه تجاري',
+            type: 'إجارة منتهية بالتمليك',
+            amount: 45000,
+            monthlyReturn: 860,
+            roi: 22.9,
+            serial: 'LMZ-2026-884',
+            takaful: 'TAK-99201',
+            posToday: '68 كوب اليوم (+29 ج.م نصيبك)',
+            gps: 'التجمع الخامس - القاهرة'
+          },
+          {
+            id: 'AST-102',
+            title: 'جهاز سونار تشخيصي - مركز طبي معتمد',
+            type: 'إجارة معدات طبية',
+            amount: 63000,
+            monthlyReturn: 1210,
+            roi: 23.0,
+            serial: 'GE-MED-4410',
+            takaful: 'TAK-99412',
+            posToday: '9 فحوصات اليوم (+41 ج.م نصيبك)',
+            gps: 'المهندسين - الجيزة'
+          }
+        ],
+        opportunities: [
+          {
+            id: 'OPP-1',
+            category: 'ijara',
+            title: 'وحدة أسنان رقمية متكاملة — مجمع عيادات',
+            typeLabel: 'إجارة معدات (36 شهراً)',
+            target: 120000,
+            funded: 95000,
+            minAmount: 2500,
+            roi: 23.5,
+            takaful: 'وثيقة تأمين تكافلي شاملة ضد الأعطال #TK-402',
+            collateral: 'رهن حيازي للمعدة + استقطاع POS يومي 15%'
+          },
+          {
+            id: 'OPP-2',
+            category: 'murabaha',
+            title: 'تمويل طلبية أدوية ومستلزمات سريعة الدوران — سلاسل صيدليات',
+            typeLabel: 'مرابحة فواتير (دورة 35 يوماً)',
+            target: 80000,
+            funded: 64000,
+            minAmount: 2000,
+            roi: 21.8,
+            takaful: 'بضاعة مسلمة بمخازن معتمدة وفواتير مقبولة الدفع',
+            collateral: 'شيكات بنكية + تحصيل مباشر من نقاط البيع'
+          },
+          {
+            id: 'OPP-3',
+            category: 'green',
+            title: 'أسطول 10 بطاريات سكوتر توصيل ذكية (تبديل فوري)',
+            typeLabel: 'إجارة تشغيلية يومية',
+            target: 60000,
+            funded: 42000,
+            minAmount: 1000,
+            roi: 24.2,
+            takaful: 'تتبع GPS ذكي وإيقاف عن بعد + تأمين استبدال',
+            collateral: 'تحصيل يومي إلكتروني من مناديب التوصيل'
+          }
+        ],
+        ledger: [
+          { title: 'تحصيل عائد إجارة شهري (نقاط بيع POS)', date: 'منذ ساعتين', amount: '+2,070 ج.م', type: 'in' },
+          { title: 'شراء وتخصيص 2.5 جرام ذهب عيار 24', date: 'أمس', amount: '-10,300 ج.م', type: 'out' },
+          { title: 'إيداع سيولة عبر تحويل بنكي', date: 'منذ 3 أيام', amount: '+25,000 ج.م', type: 'in' }
+        ]
+      }));
+    }
+
+    function persistCurrentUserState() {
+      if (!state.user || !state.user.id) return;
+      const payload = {
+        ...state.user,
+        ...getDefaultAccountState(),
+        ...state,
+        role: state.role || 'user',
+        currency: state.currency || 'EGP',
+        cashBalance: Number(state.cashBalance || 0),
+        goldGrams: Number(state.goldGrams || 0),
+        goldPrice24: Number(state.goldPrice24 || 0),
+        goldBars: Array.isArray(state.goldBars) ? state.goldBars : getDefaultAccountState().goldBars,
+        ownedAssets: Array.isArray(state.ownedAssets) ? state.ownedAssets : getDefaultAccountState().ownedAssets,
+        opportunities: Array.isArray(state.opportunities) ? state.opportunities : getDefaultAccountState().opportunities,
+        ledger: Array.isArray(state.ledger) ? state.ledger : getDefaultAccountState().ledger,
+        lastUpdatedAt: new Date().toISOString()
+      };
+
+      delete payload.rates;
+      delete payload.symbols;
+      delete payload.privacy;
+      delete payload.autoGold;
+      delete payload.waqfPercent;
+      delete payload.goldTradeMode;
+      delete payload.oppFilter;
+      delete payload.user;
+
+      localStorage.setItem(STORAGE_KEYS.currentUser, JSON.stringify(payload));
+      localStorage.setItem(getUserProfileKey(payload.id), JSON.stringify(payload));
+      registerUser(payload);
+
+      if (window.OSOOL_FIREBASE && window.OSOOL_FIREBASE.ready) {
+        window.OSOOL_FIREBASE.setUserProfile(payload).catch(() => {});
+      }
+    }
+
+    function hydrateUserFromStorage(userSeed) {
+      if (!userSeed || !userSeed.id) {
+        state.user = null;
+        state.role = 'user';
+        state.currency = 'EGP';
+        state.cashBalance = Number(state.cashBalance || 50000);
+        return;
+      }
+
+      const profile = JSON.parse(localStorage.getItem(getUserProfileKey(userSeed.id)) || 'null');
+      const merged = {
+        ...getDefaultAccountState(),
+        ...userSeed,
+        ...(profile || {}),
+        id: userSeed.id,
+        role: userSeed.role || profile?.role || 'user',
+        currency: userSeed.currency || profile?.currency || 'EGP'
+      };
+
+      state.user = merged;
+      state.role = merged.role || 'user';
+      state.currency = merged.currency || 'EGP';
+      state.cashBalance = Number(merged.cashBalance || 50000);
+      state.goldGrams = Number(merged.goldGrams || 10);
+      state.goldPrice24 = Number(merged.goldPrice24 || 4120);
+      state.goldBars = Array.isArray(merged.goldBars) ? merged.goldBars : getDefaultAccountState().goldBars;
+      state.ownedAssets = Array.isArray(merged.ownedAssets) ? merged.ownedAssets : getDefaultAccountState().ownedAssets;
+      state.opportunities = Array.isArray(merged.opportunities) ? merged.opportunities : getDefaultAccountState().opportunities;
+      state.ledger = Array.isArray(merged.ledger) ? merged.ledger : getDefaultAccountState().ledger;
+      if (merged.name) {
+        document.getElementById('currencySelect').value = state.currency;
+      }
+    }
+
     const state = {
       user: null, // بيانات المستخدم المسجل
       role: 'user',
@@ -1042,12 +1238,11 @@
     // 2. إدارة المستخدمين والتسجيل الجديد (AUTH & ONBOARDING)
     // ==========================================
     function checkUserSession() {
-      const savedUser = localStorage.getItem('osool_current_user');
+      const savedUser = localStorage.getItem(STORAGE_KEYS.currentUser);
       if (savedUser) {
         try {
           const parsed = JSON.parse(savedUser);
-          state.user = parsed;
-          state.role = parsed.role || 'user';
+          hydrateUserFromStorage(parsed);
           applyUserData();
           closeAuthModal();
         } catch (e) {
@@ -1058,10 +1253,48 @@
       }
     }
 
+    function renderSavedAccountsList() {
+      const container = document.getElementById('savedAccountsList');
+      if (!container) return;
+      const registry = readUserRegistry();
+      if (!registry.length) {
+        container.classList.add('hidden');
+        container.innerHTML = '';
+        return;
+      }
+
+      container.classList.remove('hidden');
+      container.innerHTML = `
+        <div class="text-[10px] text-slateMuted mb-1">حسابات محفوظة</div>
+        ${registry.slice(0, 3).map(user => `
+          <button type="button" onclick="loginExistingUser('${user.id}')" class="w-full text-right p-2 rounded-xl bg-alabaster dark:bg-obsidian border border-black/10 dark:border-white/10">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-bold text-obsidian dark:text-white">${user.name}</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded-full ${user.role === 'admin' ? 'bg-rose-500/15 text-rose-700' : 'bg-emerald-500/15 text-emerald-700'}">${user.role === 'admin' ? 'مدير' : 'مستخدم'}</span>
+            </div>
+            <div class="text-[10px] text-slateMuted mt-0.5">${user.phone} • ${user.currency}</div>
+          </button>
+        `).join('')}
+      `;
+    }
+
+    function loginExistingUser(userId) {
+      const registry = readUserRegistry();
+      const user = registry.find(item => item.id === userId);
+      if (!user) return showToast('هذا الحساب غير موجود');
+      localStorage.setItem(STORAGE_KEYS.currentUser, JSON.stringify(user));
+      hydrateUserFromStorage(user);
+      applyUserData();
+      closeAuthModal();
+      renderAll();
+      showToast(`تم فتح حساب ${user.name} بنجاح`);
+    }
+
     function openAuthModal() {
       const modal = document.getElementById('authModal');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
+      renderSavedAccountsList();
 
       const closeBtn = document.getElementById('authCloseBtn');
       if (state.user) {
@@ -1100,12 +1333,14 @@
       if (!name) return showToast('يرجى كتابة الاسم الكامل');
 
       const userObj = {
+        id: generateUserId('USR'),
         name: name,
         phone: phone || '+20 100 000 0000',
         currency: curr,
         nominee: nominee,
         accountNo: Math.floor(1000 + Math.random() * 9000),
-        joinedAt: new Date().toLocaleDateString('ar-EG')
+        joinedAt: new Date().toLocaleDateString('ar-EG'),
+        role: 'user'
       };
 
       state.user = userObj;
@@ -1114,7 +1349,7 @@
       state.cashBalance = initialBal;
       document.getElementById('currencySelect').value = curr;
 
-      localStorage.setItem('osool_current_user', JSON.stringify(userObj));
+      persistCurrentUserState();
       applyUserData();
       closeAuthModal();
       renderAll();
@@ -1123,6 +1358,7 @@
 
     function loginAdmin() {
       const adminUser = {
+        id: 'ADMIN-PLATFORM',
         name: 'مدير المنصة',
         phone: 'ADMIN',
         currency: 'EGP',
@@ -1135,7 +1371,7 @@
       state.role = 'admin';
       state.currency = 'EGP';
       document.getElementById('currencySelect').value = 'EGP';
-      localStorage.setItem('osool_current_user', JSON.stringify(adminUser));
+      persistCurrentUserState();
       applyUserData();
       closeAuthModal();
       renderAll();
@@ -1147,6 +1383,7 @@
       const demoNames = ['أحمد الشريف', 'كريم عثمان', 'عمر الفاروق', 'يوسف ممدوح'];
       const pickedName = demoNames[Math.floor(Math.random() * demoNames.length)];
       const userObj = {
+        id: generateUserId('GUEST'),
         name: pickedName,
         phone: '+20 109 ' + Math.floor(1000000 + Math.random() * 9000000),
         currency: 'EGP',
@@ -1162,7 +1399,7 @@
       state.cashBalance = 60000;
       document.getElementById('currencySelect').value = 'EGP';
 
-      localStorage.setItem('osool_current_user', JSON.stringify(userObj));
+      persistCurrentUserState();
       applyUserData();
       closeAuthModal();
       renderAll();
@@ -1259,6 +1496,7 @@
       renderShariaZakat(goldVal, opsVal, monthlyYield);
       calcFounderRevenue();
       syncGoldCalc('grams');
+      persistCurrentUserState();
     }
 
     function renderIoTTelemetry() {
@@ -1901,6 +2139,10 @@
       item.status = 'approved';
       saveWalletQueue(queue);
 
+      if (window.OSOOL_FIREBASE && window.OSOOL_FIREBASE.ready) {
+        window.OSOOL_FIREBASE.updateWalletRequest(item.id, { status: 'approved', approvedAt: new Date().toISOString() }).catch(() => {});
+      }
+
       if (type === 'deposit') {
         state.cashBalance += item.amount;
         state.ledger.unshift({ title: `تأكيد شحن محفظة من ${item.userName}`, date: 'الآن', amount: `+${fmtMoney(item.amount)}`, type: 'in' });
@@ -1966,7 +2208,8 @@
         note: note,
         status: 'pending',
         createdAt: new Date().toISOString(),
-        image: ''
+        image: '',
+        userId: state.user.id || state.user.accountNo || 'guest-user'
       };
 
       const proofInput = document.getElementById('cashModalProof');
@@ -1975,11 +2218,17 @@
           newRequest.image = data;
           queue.push(newRequest);
           saveWalletQueue(queue);
+          if (window.OSOOL_FIREBASE && window.OSOOL_FIREBASE.ready) {
+            window.OSOOL_FIREBASE.saveWalletRequest(newRequest).catch(() => {});
+          }
           closeModal();
           showToast(mode === 'deposit' ? 'تم إرسال طلب شحن المحفظة للإدارة للمراجعة' : 'تم إرسال طلب السحب للإدارة للمراجعة');
         }).catch(() => {
           queue.push(newRequest);
           saveWalletQueue(queue);
+          if (window.OSOOL_FIREBASE && window.OSOOL_FIREBASE.ready) {
+            window.OSOOL_FIREBASE.saveWalletRequest(newRequest).catch(() => {});
+          }
           closeModal();
           showToast(mode === 'deposit' ? 'تم إرسال طلب شحن المحفظة دون صورة إثبات' : 'تم إرسال طلب السحب للإدارة للمراجعة');
         });
@@ -1988,6 +2237,9 @@
 
       queue.push(newRequest);
       saveWalletQueue(queue);
+      if (window.OSOOL_FIREBASE && window.OSOOL_FIREBASE.ready) {
+        window.OSOOL_FIREBASE.saveWalletRequest(newRequest).catch(() => {});
+      }
       closeModal();
       showToast(mode === 'deposit' ? 'تم إرسال طلب شحن المحفظة للإدارة للمراجعة' : 'تم إرسال طلب السحب للإدارة للمراجعة');
     }
