@@ -1237,6 +1237,20 @@
     // ==========================================
     // 2. إدارة المستخدمين والتسجيل الجديد (AUTH & ONBOARDING)
     // ==========================================
+    function resetAccountState() {
+      state.user = null;
+      state.role = 'user';
+      state.currency = 'EGP';
+      state.cashBalance = 50000;
+      state.goldGrams = 10;
+      state.goldPrice24 = 4120;
+      state.goldBars = JSON.parse(JSON.stringify(getDefaultAccountState().goldBars));
+      state.ownedAssets = JSON.parse(JSON.stringify(getDefaultAccountState().ownedAssets));
+      state.opportunities = JSON.parse(JSON.stringify(getDefaultAccountState().opportunities));
+      state.ledger = JSON.parse(JSON.stringify(getDefaultAccountState().ledger));
+      document.getElementById('currencySelect').value = 'EGP';
+    }
+
     function checkUserSession() {
       const savedUser = localStorage.getItem(STORAGE_KEYS.currentUser);
       if (savedUser) {
@@ -1290,6 +1304,26 @@
       showToast(`تم فتح حساب ${user.name} بنجاح`);
     }
 
+    function logoutCurrentUser() {
+      localStorage.removeItem(STORAGE_KEYS.currentUser);
+      state.user = null;
+      state.role = 'user';
+      state.currency = 'EGP';
+      state.cashBalance = 50000;
+      state.goldGrams = 10;
+      state.goldPrice24 = 4120;
+      state.goldBars = JSON.parse(JSON.stringify(getDefaultAccountState().goldBars));
+      state.ownedAssets = JSON.parse(JSON.stringify(getDefaultAccountState().ownedAssets));
+      state.opportunities = JSON.parse(JSON.stringify(getDefaultAccountState().opportunities));
+      state.ledger = JSON.parse(JSON.stringify(getDefaultAccountState().ledger));
+      document.getElementById('currencySelect').value = 'EGP';
+      closeAuthModal();
+      openAuthModal();
+      clearSigCanvas();
+      renderAll();
+      showToast('تم تسجيل الخروج بنجاح. يمكنك إنشاء حساب جديد أو الدخول كضيف');
+    }
+
     function openAuthModal() {
       const modal = document.getElementById('authModal');
       modal.classList.remove('hidden');
@@ -1297,7 +1331,8 @@
       renderSavedAccountsList();
 
       const closeBtn = document.getElementById('authCloseBtn');
-      if (state.user) {
+      const userExists = !!state.user;
+      if (userExists) {
         closeBtn.classList.remove('hidden');
         document.getElementById('authNameInput').value = state.user.name || '';
         document.getElementById('authPhoneInput').value = state.user.phone || '';
@@ -1305,6 +1340,10 @@
         document.getElementById('authNomineeInput').value = state.user.nominee || '';
       } else {
         closeBtn.classList.add('hidden');
+        document.getElementById('authNameInput').value = '';
+        document.getElementById('authPhoneInput').value = '';
+        document.getElementById('authCurrencyInput').value = 'EGP';
+        document.getElementById('authNomineeInput').value = '';
       }
     }
 
@@ -1315,7 +1354,13 @@
     }
 
     function closeAuthModalIfLoggedIn() {
-      if (state.user) closeAuthModal();
+      if (state.user) {
+        if (state.role === 'admin') {
+          logoutCurrentUser();
+          return;
+        }
+        closeAuthModal();
+      }
     }
 
     function setAuthInitialBalance(val) {
